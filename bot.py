@@ -9,25 +9,25 @@ import os
 import asyncio
 from keep_alive import keep_alive
 
-# Define states for the conversation
+# تعریف مراحل مکالمه
 CLASS_SELECTION, AGE_SELECTION, NAME_INPUT, PHONE_INPUT = range(4)
 
-# Initialize SQLite database
+# راه‌اندازی دیتابیس
 try:
     conn = sqlite3.connect("data.db", check_same_thread=False)
     c = conn.cursor()
     c.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, class TEXT, age_range TEXT, name TEXT, phone TEXT)")
     conn.commit()
 except sqlite3.Error as e:
-    print(f"Database error: {e}")
+    print(f"خطای دیتابیس: {e}")
     exit(1)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle the /start command and show class selection menu."""
+    """مدیریت دستور /start و نمایش منوی کلاس‌ها"""
     try:
         await update.message.reply_text("سلام به باشگاه موسینو خوش آمدید! 😊")
         
-        # Define class options
+        # تعریف گزینه‌های کلاس
         class_options = [
             ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
             ["کلاس آموزشی هوش مصنوعی", "کلاس زبان انگلیسی تخصصی رباتیک"],
@@ -42,11 +42,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return CLASS_SELECTION
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"Error in start: {e}")
+        print(f"خطا در start: {e}")
         return ConversationHandler.END
 
 async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle class selection and validate input."""
+    """مدیریت انتخاب کلاس و اعتبارسنجی"""
     try:
         selected_class = update.message.text
         valid_classes = [
@@ -61,25 +61,25 @@ async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         context.user_data["class"] = selected_class
         
-        # Define age ranges
+        # تعریف بازه‌های سنی
         age_options = [
             ["8-10 سال", "10-14 سال"],
             ["14-15 سال", "20-35 سال"]
         ]
-        reply_keyboard = ReplyKeyboardMarkup(age_options, one_time_keyboard=True, resize_keyboard=True)
+支keyboard = ReplyKeyboardMarkup(age_options, one_time_keyboard=True, resize_keyboard=True)
         
         await update.message.reply_text(
             "شما چند سال سن دارید؟ لطفاً بازه سنی خود را انتخاب کنید:",
-            reply_markup=reply_keyboard
+            reply_markup=keyboard
         )
         return AGE_SELECTION
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"Error in get_class: {e}")
+        print(f"خطا در get_class: {e}")
         return ConversationHandler.END
 
 async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle age selection and validate."""
+    """مدیریت انتخاب سن و اعتبارسنجی"""
     try:
         age_range = update.message.text
         valid_ages = ["8-10 سال", "10-14 سال", "14-15 سال", "20-35 سال"]
@@ -90,7 +90,7 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         selected_class = context.user_data.get("class")
         
-        # Check if AI class is selected and age is 8-10
+        # بررسی محدودیت سنی برای کلاس هوش مصنوعی
         if selected_class == "کلاس آموزشی هوش مصنوعی" and age_range == "8-10 سال":
             class_options = [
                 ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
@@ -104,7 +104,7 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         context.user_data["age_range"] = age_range
         
-        # Ask for name
+        # درخواست نام
         await update.message.reply_text(
             "لطفاً نام خود را وارد کنید:",
             reply_markup=ReplyKeyboardRemove()
@@ -112,20 +112,20 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return NAME_INPUT
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"Error in get_age: {e}")
+        print(f"خطا در get_age: {e}")
         return ConversationHandler.END
 
 async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle name input."""
+    """مدیریت ورودی نام"""
     try:
         name = update.message.text.strip()
-        if not name:
-            await update.message.reply_text("لطفاً نام معتبر وارد کنید. 😊")
+        if not name or len(name) < 2:
+            await update.message.reply_text("لطفاً نام معتبر (حداقل 2 حرف) وارد کنید. 😊")
             return NAME_INPUT
         
         context.user_data["name"] = name
         
-        # Request phone number with Share Contact button
+        # درخواست شماره تماس با دکمه اشتراک
         reply_keyboard = [[KeyboardButton("اشتراک شماره تماس", request_contact=True)]]
         await update.message.reply_text(
             "لطفاً شماره تماس خود را با استفاده از دکمه زیر به اشتراک بگذارید:",
@@ -134,19 +134,19 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return PHONE_INPUT
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"Error in get_name: {e}")
+        print(f"خطا در get_name: {e}")
         return ConversationHandler.END
 
 async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle phone number input via contact or text."""
+    """مدیریت ورودی شماره تماس"""
     try:
         phone = None
         if update.message.contact:
             phone = update.message.contact.phone_number
         else:
             phone = update.message.text.strip()
-            # Basic phone number validation (accepts digits and optional +)
-            if not (phone.startswith("+") and phone[1:].isdigit() or phone.isdigit()):
+            # اعتبارسنجی ساده شماره تماس
+            if not (phone.startswith("+") and phone[1:].isdigit() or phone.isdigit()) or len(phone) < 7:
                 await update.message.reply_text("لطفاً شماره تماس معتبر وارد کنید یا از دکمه اشتراک استفاده کنید. 😊")
                 return PHONE_INPUT
         
@@ -155,17 +155,17 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         age_range = context.user_data.get("age_range")
         name = context.user_data.get("name")
         
-        # Store data in database
+        # ذخیره اطلاعات در دیتابیس
         try:
             c.execute("INSERT OR REPLACE INTO users (id, class, age_range, name, phone) VALUES (?, ?, ?, ?, ?)",
                      (user_id, selected_class, age_range, name, phone))
             conn.commit()
         except sqlite3.Error as e:
             await update.message.reply_text("خطایی در ذخیره‌سازی اطلاعات رخ داد. لطفاً دوباره امتحان کنید.")
-            print(f"Database error in get_phone: {e}")
+            print(f"خطای دیتابیس در get_phone: {e}")
             return ConversationHandler.END
         
-        # Send Instagram link and thank-you message
+        # ارسال لینک اینستاگرام و پیام تشکر
         await update.message.reply_text(
             "✅ ممنون از ثبت اطلاعات! 😊\n"
             "برای اطلاعات بیشتر، ما را در اینستاگرام دنبال کنید:\n"
@@ -176,25 +176,34 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return ConversationHandler.END
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"Error in get_phone: {e}")
+        print(f"خطا در get_phone: {e}")
         return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Handle the /cancel command."""
+    """مدیریت دستور /cancel"""
     try:
         await update.message.reply_text("لغو شد.", reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"Error in cancel: {e}")
+        print(f"خطا در cancel: {e}")
         return ConversationHandler.END
+
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """مدیریت خطاهای کلی"""
+    try:
+        print(f"خطا: {context.error}")
+        if update and update.message:
+            await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+    except Exception as e:
+        print(f"خطا در error_handler: {e}")
 
 if __name__ == "__main__":
     try:
         keep_alive()
         TOKEN = os.environ.get("TOKEN")
         if not TOKEN:
-            print("Error: TOKEN environment variable not set")
+            print("خطا: متغیر محیطی TOKEN تنظیم نشده است")
             exit(1)
         
         app = ApplicationBuilder().token(TOKEN).build()
@@ -211,8 +220,9 @@ if __name__ == "__main__":
         )
         
         app.add_handler(conv)
+        app.add_error_handler(error_handler)
         
-        # Run polling with graceful stop
+        # اجرای polling با توقف صحیح
         loop = asyncio.get_event_loop()
         try:
             loop.run_until_complete(app.run_polling(allowed_updates=Update.ALL_TYPES))
@@ -221,16 +231,16 @@ if __name__ == "__main__":
             loop.run_until_complete(app.stop())
             loop.close()
     except Exception as e:
-        print(f"Error in main: {e}")
+        print(f"خطا در main: {e}")
         exit(1)
 
-# Ensure database connection is closed on exit
+# بستن اتصال دیتابیس هنگام خروج
 def cleanup():
     try:
         conn.close()
-        print("Database connection closed")
+        print("اتصال دیتابیس بسته شد")
     except Exception as e:
-        print(f"Error closing database: {e}")
+        print(f"خطا در بستن دیتابیس: {e}")
 
 import atexit
 atexit.register(cleanup)
