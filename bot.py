@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت دستور /start و نمایش منوی کلاس‌ها"""
     try:
         await update.message.reply_text("سلام به باشگاه موسینو خوش آمدید! 😊")
-        
+        await update.message.reply_text("باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است. 🫡")
         # تعریف گزینه‌های کلاس (هر کدام یک دوره جداگانه)
         class_options = [
             ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
@@ -169,8 +169,8 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text(
             "✅ ممنون از ثبت اطلاعات! 😊\n"
             "برای اطلاعات بیشتر، ما را در اینستاگرام دنبال کنید:\n"
-            "لینک: https://www.instagram.com/musino_academy\n"
-            "آیدی: @MusinoAcademy",
+            "لینک: https://www.instagram.com/ircstem?igsh=dXVvaGpnbTBkYnoy \n"
+            "آیدی: @ircstem",
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
