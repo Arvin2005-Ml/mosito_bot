@@ -27,7 +27,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         await update.message.reply_text("سلام به باشگاه موسینو خوش آمدید! 😊")
         
-        # تعریف گزینه‌های کلاس
+        # تعریف گزینه‌های کلاس (هر کدام یک دوره جداگانه)
         class_options = [
             ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
             ["کلاس آموزشی هوش مصنوعی", "کلاس زبان انگلیسی تخصصی رباتیک"],
@@ -36,7 +36,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         reply_keyboard = ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
         
         await update.message.reply_text(
-            "لطفاً یکی از کلاس‌های آموزشی زیر را انتخاب کنید:",
+            "لطفاً یکی از دوره‌های آموزشی زیر را انتخاب کنید:",
             reply_markup=reply_keyboard
         )
         return CLASS_SELECTION
@@ -46,7 +46,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return ConversationHandler.END
 
 async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """مدیریت انتخاب کلاس و اعتبارسنجی"""
+    """مدیریت انتخاب دوره و اعتبارسنجی"""
     try:
         selected_class = update.message.text
         valid_classes = [
@@ -56,7 +56,7 @@ async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         ]
         
         if selected_class not in valid_classes:
-            await update.message.reply_text("لطفاً فقط یکی از گزینه‌های منو را انتخاب کنید. 😊")
+            await update.message.reply_text("لطفاً فقط یکی از دوره‌های منو را انتخاب کنید. 😊")
             return CLASS_SELECTION
         
         context.user_data["class"] = selected_class
@@ -66,11 +66,11 @@ async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             ["8-10 سال", "10-14 سال"],
             ["14-15 سال", "20-35 سال"]
         ]
-支keyboard = ReplyKeyboardMarkup(age_options, one_time_keyboard=True, resize_keyboard=True)
+        reply_keyboard = ReplyKeyboardMarkup(age_options, one_time_keyboard=True, resize_keyboard=True)
         
         await update.message.reply_text(
             "شما چند سال سن دارید؟ لطفاً بازه سنی خود را انتخاب کنید:",
-            reply_markup=keyboard
+            reply_markup=reply_keyboard
         )
         return AGE_SELECTION
     except Exception as e:
@@ -90,14 +90,14 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         selected_class = context.user_data.get("class")
         
-        # بررسی محدودیت سنی برای کلاس هوش مصنوعی
+        # بررسی محدودیت سنی برای دوره هوش مصنوعی
         if selected_class == "کلاس آموزشی هوش مصنوعی" and age_range == "8-10 سال":
             class_options = [
                 ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
                 ["کلاس زبان انگلیسی تخصصی رباتیک", "دوره‌های آموزشی سلول خورشیدی"]
             ]
             await update.message.reply_text(
-                "متأسفیم، کلاس هوش مصنوعی برای بازه سنی 8-10 سال مناسب نیست. لطفاً کلاس دیگری انتخاب کنید.",
+                "متأسفیم، دوره هوش مصنوعی برای بازه سنی 8-10 سال مناسب نیست. لطفاً دوره دیگری انتخاب کنید.",
                 reply_markup=ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
             )
             return CLASS_SELECTION
@@ -192,9 +192,13 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """مدیریت خطاهای کلی"""
     try:
-        print(f"خطا: {context.error}")
-        if update and update.message:
-            await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        if isinstance(context.error, telegram.error.Conflict):
+            print("خطای Conflict: نمونه دیگری از ربات در حال اجراست")
+            await update.message.reply_text("ربات در حال حاضر فعال است. لطفاً بعداً امتحان کنید.")
+        else:
+            print(f"خطا: {context.error}")
+            if update and update.message:
+                await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
     except Exception as e:
         print(f"خطا در error_handler: {e}")
 
