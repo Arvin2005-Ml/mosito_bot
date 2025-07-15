@@ -2,7 +2,7 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardB
 from telegram.ext import (
     ApplicationBuilder, CommandHandler,
     MessageHandler, ConversationHandler,
-    filters, ContextTypes
+    filters, ContextTypes, Application
 )
 import sqlite3
 import os
@@ -10,9 +10,14 @@ import asyncio
 import json
 from datetime import datetime
 from keep_alive import keep_alive
+from fastapi import FastAPI, Request, HTTPException
+from telegram.ext import Application
 
 # تعریف مراحل مکالمه
 CLASS_SELECTION, AGE_SELECTION, NAME_INPUT, PHONE_INPUT, GETDB_PASSWORD = range(5)
+
+# راه‌اندازی FastAPI برای Webhook
+app = FastAPI()
 
 # راه‌اندازی دیتابیس
 try:
@@ -41,7 +46,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             "باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است. 🫡"
         )
         
-        # تعریف گزینه‌های کلاس (هر کدام یک دوره جداگانه)
         class_options = [
             ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
             ["کلاس آموزشی هوش مصنوعی", "کلاس زبان انگلیسی تخصصی رباتیک"],
@@ -75,7 +79,6 @@ async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         context.user_data["class"] = selected_class
         
-        # تعریف بازه‌های سنی
         age_options = [
             ["8-10 سال", "10-14 سال"],
             ["14-15 سال", "20-35 سال"]
@@ -104,7 +107,6 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         selected_class = context.user_data.get("class")
         
-        # بررسی محدودیت سنی برای دوره هوش مصنوعی
         if selected_class == "کلاس آموزشی هوش مصنوعی" and age_range == "8-10 سال":
             class_options = [
                 ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
@@ -118,7 +120,6 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         context.user_data["age_range"] = age_range
         
-        # درخواست نام
         await update.message.reply_text(
             "لطفاً نام خود را وارد کنید:",
             reply_markup=ReplyKeyboardRemove()
@@ -139,7 +140,6 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         context.user_data["name"] = name
         
-        # درخواست شماره تماس با دکمه اشتراک
         reply_keyboard = [[KeyboardButton("اشتراک شماره تماس", request_contact=True)]]
         await update.message.reply_text(
             "لطفاً شماره تماس خود را با استفاده از دکمه زیر به اشتراک بگذارید:",
@@ -159,7 +159,6 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             phone = update.message.contact.phone_number
         else:
             phone = update.message.text.strip()
-            # اعتبارسنجی ساده شماره تماس
             if not (phone.startswith("+") and phone[1:].isdigit() or phone.isdigit()) or len(phone) < 7:
                 await update.message.reply_text("لطفاً شماره تماس معتبر وارد کنید یا از دکمه اشتراک استفاده کنید. 😊")
                 return PHONE_INPUT
@@ -170,7 +169,6 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         name = context.user_data.get("name")
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # ذخیره اطلاعات در دیتابیس
         try:
             c.execute("INSERT OR REPLACE INTO users (id, class, age_range, name, phone, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
                      (user_id, selected_class, age_range, name, phone, timestamp))
@@ -178,9 +176,8 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         except sqlite3.Error as e:
             await update.message.reply_text("خطایی در ذخیره‌سازی اطلاعات رخ داد. لطفاً دوباره امتحان کنید.")
             print(f"خطای دیتابیس در get_phone: {e}")
-            return ConversationHandler.END
+            return ConversationAdministratorsHandler.END
         
-        # ارسال لینک اینستاگرام و پیام تشکر
         await update.message.reply_text(
             "✅ ممنون از ثبت اطلاعات! 😊\n"
             "برای اطلاعات بیشتر، ما را در اینستاگرام دنبال کنید:\n"
@@ -189,7 +186,6 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             reply_markup=ReplyKeyboardRemove()
         )
         
-        # ارسال پیام معرفی به‌عنوان آخرین پیام
         await update.message.reply_text(
             "باشگاه رباتیک موسیتو با هدف پرورش نسل خلاق، نوآور و آشنا با فناوری‌های نوین، فعالیت خود را در حوزه آموزش رباتیک و هوش مصنوعی آغاز کرده و تاکنون میزبان صدها دانش‌آموز علاقه‌مند بوده است. "
             "در این باشگاه، کودکان و نوجوانان با مباحث پایه تا پیشرفته رباتیک، برنامه‌نویسی، الکترونیک، طراحی و ساخت ربات‌های واقعی آشنا می‌شوند و مهارت‌های عملی خود را در فضایی آموزشی، پویا و سرگرم‌کننده ارتقا می‌دهند."
@@ -221,7 +217,6 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             await update.message.reply_text("رمز عبور نادرست است. 😊")
             return ConversationHandler.END
         
-        # دریافت اطلاعات از دیتابیس
         try:
             c.execute("SELECT id, class, age_range, name, phone, timestamp FROM users")
             users = c.fetchall()
@@ -230,7 +225,6 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             print(f"خطای دیتابیس در verify_password: {e}")
             return ConversationHandler.END
         
-        # تبدیل اطلاعات به فرمت JSON
         users_list = [
             {
                 "id": user[0],
@@ -242,16 +236,13 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             } for user in users
         ]
         
-        # ذخیره JSON در فایل موقت
         json_file_path = "users_data.json"
         with open(json_file_path, "w", encoding="utf-8") as f:
             json.dump(users_list, f, ensure_ascii=False, indent=4)
         
-        # ارسال فایل JSON
         with open(json_file_path, "rb") as f:
             await update.message.reply_document(document=f, filename="users_data.json")
         
-        # حذف فایل موقت
         os.remove(json_file_path)
         
         await update.message.reply_text("فایل اطلاعات کاربران با موفقیت ارسال شد.")
@@ -284,15 +275,42 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     except Exception as e:
         print(f"خطا در error_handler: {e}")
 
+# تابع بررسی قفل
+def acquire_lock():
+    lock_file = "bot.lock"
+    if os.path.exists(lock_file):
+        print("خطا: یک نمونه دیگر از ربات در حال اجراست.")
+        exit(1)
+    with open(lock_file, "w") as f:
+        f.write(str(os.getpid()))
+    return lock_file
+
+# تابع حذف قفل
+def release_lock(lock_file):
+    if os.path.exists(lock_file):
+        os.remove(lock_file)
+
+# Webhook endpoint
+@app.post("/webhook")
+async def webhook(request: Request):
+    update = Update.de_json(await request.json(), bot)
+    await application.process_update(update)
+    return {"status": "ok"}
+
+# متغیر جهانی برای application
+application = None
+
 if __name__ == "__main__":
     try:
+        lock_file = acquire_lock()
+        atexit.register(release_lock, lock_file)
         keep_alive()
         TOKEN = os.environ.get("TOKEN")
         if not TOKEN:
             print("خطا: متغیر محیطی TOKEN تنظیم نشده است")
             exit(1)
         
-        app = ApplicationBuilder().token(TOKEN).build()
+        application = ApplicationBuilder().token(TOKEN).build()
         
         conv = ConversationHandler(
             entry_points=[
@@ -309,17 +327,18 @@ if __name__ == "__main__":
             fallbacks=[CommandHandler("cancel", cancel)]
         )
         
-        app.add_handler(conv)
-        app.add_error_handler(error_handler)
+        application.add_handler(conv)
+        application.add_error_handler(error_handler)
         
-        # اجرای polling با توقف صحیح
+        # تنظیم Webhook
+        webhook_url = os.environ.get("WEBHOOK_URL", "https://last-mossito.onrender.com")
         loop = asyncio.get_event_loop()
-        try:
-            loop.run_until_complete(app.run_polling(allowed_updates=Update.ALL_TYPES))
-        finally:
-            loop.run_until_complete(app.updater.stop())
-            loop.run_until_complete(app.stop())
-            loop.close()
+        loop.run_until_complete(application.bot.setWebhook(f"{webhook_url}/webhook"))
+        
+        # اجرای FastAPI با uvicorn
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+        
     except Exception as e:
         print(f"خطا در main: {e}")
         exit(1)
@@ -332,5 +351,4 @@ def cleanup():
     except Exception as e:
         print(f"خطا در بستن دیتابیس: {e}")
 
-import atexit
 atexit.register(cleanup)
