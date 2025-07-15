@@ -1,5 +1,5 @@
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, InputFile
-from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, ConversationHandler, filters, CallbackContext
 from telegram.error import InvalidToken, NetworkError
 import sqlite3
 import os
@@ -255,10 +255,10 @@ def main():
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler("start", start)],
             states={
-                CLASS_SELECTION: [MessageHandler(Filters.text & ~Filters.command, get_class)],
-                AGE_SELECTION: [MessageHandler(Filters.text & ~Filters.command, get_age)],
-                NAME_INPUT: [MessageHandler(Filters.text & ~Filters.command, get_name)],
-                PHONE_INPUT: [MessageHandler(Filters.text & ~Filters.command | Filters.contact, get_phone)],
+                CLASS_SELECTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_class)],
+                AGE_SELECTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_age)],
+                NAME_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)],
+                PHONE_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND | filters.CONTACT, get_phone)],
             },
             fallbacks=[CommandHandler("cancel", cancel)]
         )
