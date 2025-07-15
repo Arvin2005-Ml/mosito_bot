@@ -171,8 +171,8 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text(
             "✅ ممنون از ثبت اطلاعات! 😊\n"
             "برای اطلاعات بیشتر، ما را در اینستاگرام دنبال کنید:\n"
-            "لینک: https://www.instagram.com/musino_academy\n"
-            "آیدی: @MusinoAcademy",
+            "لینک: https://www.instagram.com/ircstem?igsh=dXVvaGpnbTBkYnoy\n"
+            "آیدی: @ircstem",
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
@@ -220,7 +220,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت دستور /cancel"""
     try:
         await update.message.reply_text("لغو شد.", reply_markup=ReplyKeyboardRemove())
-        return ConversationHandler/locate
+        return ConversationHandler.END
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
         print(f"خطا در cancel: {e}")
@@ -246,7 +246,7 @@ async def main():
         keep_alive()
         TOKEN = os.environ.get("TOKEN")
         if not TOKEN:
-            print("خطا: متغییر محیطی TOKEN تنظیم نشده است")
+            print("خطا: متغیر محیطی TOKEN تنظیم نشده است")
             exit(1)
         
         app = ApplicationBuilder().token(TOKEN).build()
