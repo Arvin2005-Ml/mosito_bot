@@ -67,13 +67,15 @@ try:
         )
     """)
     conn.commit()
+    print("Database initialized successfully")
 except sqlite3.Error as e:
-    print(f"خطای دیتابیس: {e}")
+    print(f"خطای دیتابیس در راه‌اندازی: {e}")
     exit(1)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت دستور /start و نمایش منوی کلاس‌ها"""
     try:
+        print(f"Received /start from user {update.effective_user.id}")
         await update.message.reply_text(
             "سلام به باشگاه رباتیک موسیتو خوش آمدید! 😊\n"
             "باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است. 🫡"
@@ -90,16 +92,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             "لطفاً یکی از دوره‌های آموزشی زیر را انتخاب کنید:",
             reply_markup=reply_keyboard
         )
+        print(f"Sent class selection menu to user {update.effective_user.id}")
         return CLASS_SELECTION
     except Exception as e:
+        print(f"خطا در start برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"خطا در start: {e}")
         return ConversationHandler.END
 
 async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت انتخاب دوره و اعتبارسنجی"""
     try:
         selected_class = update.message.text
+        print(f"User {update.effective_user.id} selected class: {selected_class}")
         valid_classes = [
             "کلاس آموزشی رباتیک", "کلاس آموزشی پایتون",
             "کلاس آموزشی هوش مصنوعی", "کلاس زبان انگلیسی تخصصی رباتیک",
@@ -124,14 +128,15 @@ async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
         return AGE_SELECTION
     except Exception as e:
+        print(f"خطا در get_class برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"خطا در get_class: {e}")
         return ConversationHandler.END
 
 async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت انتخاب سن و اعتبارسنجی"""
     try:
         age_range = update.message.text
+        print(f"User {update.effective_user.id} selected age range: {age_range}")
         valid_ages = ["8-10 سال", "10-14 سال", "14-15 سال", "20-35 سال"]
         
         if age_range not in valid_ages:
@@ -159,14 +164,15 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
         return NAME_INPUT
     except Exception as e:
+        print(f"خطا در get_age برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"خطا در get_age: {e}")
         return ConversationHandler.END
 
 async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت ورودی نام"""
     try:
         name = update.message.text.strip()
+        print(f"User {update.effective_user.id} entered name: {name}")
         if not name or len(name) < 2:
             await update.message.reply_text("لطفاً نام معتبر (حداقل 2 حرف) وارد کنید. 😊")
             return NAME_INPUT
@@ -180,8 +186,8 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
         return PHONE_INPUT
     except Exception as e:
+        print(f"خطا در get_name برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"خطا در get_name: {e}")
         return ConversationHandler.END
 
 async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -190,8 +196,10 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         phone = None
         if update.message.contact:
             phone = update.message.contact.phone_number
+            print(f"User {update.effective_user.id} shared contact: {phone}")
         else:
             phone = update.message.text.strip()
+            print(f"User {update.effective_user.id} entered phone: {phone}")
             if not (phone.startswith("+") and phone[1:].isdigit() or phone.isdigit()) or len(phone) < 7:
                 await update.message.reply_text("لطفاً شماره تماس معتبر وارد کنید یا از دکمه اشتراک استفاده کنید. 😊")
                 return PHONE_INPUT
@@ -203,12 +211,13 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         try:
-            c.execute("INSERT OR REPLACE INTO users (id, class, age_range, name, phone, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+            c.execute("INSERT INTO users (id, class, age_range, name, phone, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
                      (user_id, selected_class, age_range, name, phone, timestamp))
             conn.commit()
+            print(f"User {user_id} data saved successfully")
         except sqlite3.Error as e:
             await update.message.reply_text("خطایی در ذخیره‌سازی اطلاعات رخ داد. لطفاً دوباره امتحان کنید.")
-            print(f"خطای دیتابیس در get_phone: {e}")
+            print(f"خطای دیتابیس در get_phone برای کاربر {user_id}: {e}")
             return ConversationHandler.END
         
         await update.message.reply_text(
@@ -225,27 +234,29 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         )
         return ConversationHandler.END
     except Exception as e:
+        print(f"خطا در get_phone برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"خطا در get_phone: {e}")
         return ConversationHandler.END
 
 async def getdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت دستور /getdb و درخواست رمز عبور"""
     try:
+        print(f"User {update.effective_user.id} requested /getdb")
         await update.message.reply_text(
             "لطفاً رمز عبور را وارد کنید:",
             reply_markup=ReplyKeyboardRemove()
         )
         return GETDB_PASSWORD
     except Exception as e:
+        print(f"خطا در getdb برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"خطا در getdb: {e}")
         return ConversationHandler.END
 
 async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """تأیید رمز عبور و ارسال فایل JSON"""
     try:
         password = update.message.text.strip()
+        print(f"User {update.effective_user.id} entered password: {password}")
         if password != "102030":
             await update.message.reply_text("رمز عبور نادرست است. 😊")
             return ConversationHandler.END
@@ -253,9 +264,10 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         try:
             c.execute("SELECT id, class, age_range, name, phone, timestamp FROM users")
             users = c.fetchall()
+            print(f"Retrieved {len(users)} users from database")
         except sqlite3.Error as e:
             await update.message.reply_text("خطایی در دریافت اطلاعات رخ داد.")
-            print(f"خطای دیتابیس در verify_password: {e}")
+            print(f"خطای دیتابیس در verify_password برای کاربر {update.effective_user.id}: {e}")
             return ConversationHandler.END
         
         if not users:
@@ -285,18 +297,19 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await update.message.reply_text("فایل اطلاعات کاربران با موفقیت ارسال شد.")
         return ConversationHandler.END
     except Exception as e:
+        print(f"خطا در verify_password برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"خطا در verify_password: {e}")
         return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت دستور /cancel"""
     try:
+        print(f"User {update.effective_user.id} canceled conversation")
         await update.message.reply_text("لغو شد.", reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
     except Exception as e:
+        print(f"خطا در cancel برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
-        print(f"خطا در cancel: {e}")
         return ConversationHandler.END
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -304,13 +317,14 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     try:
         if isinstance(context.error, telegram.error.Conflict):
             print("خطای Conflict: نمونه دیگری از ربات در حال اجراست")
-            await update.message.reply_text("ربات در حال حاضر فعال است. لطفاً بعداً امتحان کنید.")
+            if update and update.message:
+                await update.message.reply_text("ربات در حال حاضر فعال است. لطفاً بعداً امتحان کنید.")
         else:
-            print(f"خطا: {context.error}")
+            print(f"خطا برای کاربر {update.effective_user.id} در پردازش: {context.error}")
             if update and update.message:
                 await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
     except Exception as e:
-        print(f"خطا در error_handler: {e}")
+        print(f"خطا در error_handler برای کاربر {update.effective_user.id}: {e}")
 
 # تابع بررسی قفل
 def acquire_lock():
@@ -332,11 +346,13 @@ def release_lock(lock_file):
 async def webhook(request: Request):
     global application
     if application is None:
+        print("Application is not initialized!")
         raise RuntimeError("Application is not initialized!")
     update = Update.de_json(await request.json(), application.bot)
     if update is None:
         print("Invalid update received")
         return {"status": "error", "message": "Invalid update"}
+    print(f"Processing update: {update}")
     await application.process_update(update)
     return {"status": "ok"}
 
@@ -355,6 +371,7 @@ async def initialize_application():
         
         # مقداردهی اولیه Application
         await application.initialize()
+        print("Application initialized successfully")
         
         # تعریف ConversationHandler
         conv = ConversationHandler(
@@ -374,6 +391,7 @@ async def initialize_application():
         
         application.add_handler(conv)
         application.add_error_handler(error_handler)
+        print("Handlers added successfully")
         
         # تنظیم Webhook
         webhook_url = os.environ.get("WEBHOOK_URL", "https://last-mossito.onrender.com")
