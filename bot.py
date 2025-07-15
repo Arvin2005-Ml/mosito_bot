@@ -248,8 +248,8 @@ async def main():
         TOKEN = os.environ.get("TOKEN")
         if not TOKEN:
             print("خطا: متغیر محیطی TOKEN تنظیم نشده است")
-            exit(1)
-        
+            raise ValueError("TOKEN is not set")
+
         app = ApplicationBuilder().token(TOKEN).build()
         
         conv = ConversationHandler(
@@ -274,11 +274,15 @@ async def main():
         
     except Exception as e:
         print(f"خطا در main: {e}")
+        raise  # برای دیباگ، خطا رو پرتاب می‌کنیم تا لاگ کامل بشه
     finally:
-        if app and app.updater and app.updater.running:
-            await app.updater.stop()
         if app:
-            await app.stop()
+            try:
+                if app.updater and app.updater.running:
+                    await app.updater.stop()
+                await app.stop()
+            except Exception as e:
+                print(f"خطا در توقف ربات: {e}")
 
 # بستن اتصال دیتابیس هنگام خروج
 def cleanup():
@@ -292,4 +296,7 @@ import atexit
 atexit.register(cleanup)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        print(f"خطا در اجرای اصلی: {e}")
