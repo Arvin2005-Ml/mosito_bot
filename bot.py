@@ -7,16 +7,27 @@ from telegram.ext import (
 import sqlite3
 import os
 import asyncio
+import json
+from datetime import datetime
 from keep_alive import keep_alive
 
 # تعریف مراحل مکالمه
-CLASS_SELECTION, AGE_SELECTION, NAME_INPUT, PHONE_INPUT = range(4)
+CLASS_SELECTION, AGE_SELECTION, NAME_INPUT, PHONE_INPUT, GETDB_PASSWORD = range(5)
 
 # راه‌اندازی دیتابیس
 try:
     conn = sqlite3.connect("data.db", check_same_thread=False)
     c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, class TEXT, age_range TEXT, name TEXT, phone TEXT)")
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            class TEXT,
+            age_range TEXT,
+            name TEXT,
+            phone TEXT,
+            timestamp TEXT
+        )
+    """)
     conn.commit()
 except sqlite3.Error as e:
     print(f"خطای دیتابیس: {e}")
@@ -41,11 +52,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text(
             "لطفاً یکی از دوره‌های آموزشی زیر را انتخاب کنید:",
             reply_markup=reply_keyboard
-        )
-        
-        await update.message.reply_text(
-            "باشگاه رباتیک موسیتو با هدف پرورش نسل خلاق، نوآور و آشنا با فناوری‌های نوین، فعالیت خود را در حوزه آموزش رباتیک و هوش مصنوعی آغاز کرده و تاکنون میزبان صدها دانش‌آموز علاقه‌مند بوده است. "
-            "در این باشگاه، کودکان و نوجوانان با مباحث پایه تا پیشرفته رباتیک، برنامه‌نویسی، الکترونیک، طراحی و ساخت ربات‌های واقعی آشنا می‌شوند و مهارت‌های عملی خود را در فضایی آموزشی، پویا و سرگرم‌کننده ارتقا می‌دهند."
         )
         return CLASS_SELECTION
     except Exception as e:
@@ -162,11 +168,12 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         selected_class = context.user_data.get("class")
         age_range = context.user_data.get("age_range")
         name = context.user_data.get("name")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         # ذخیره اطلاعات در دیتابیس
         try:
-            c.execute("INSERT OR REPLACE INTO users (id, class, age_range, name, phone) VALUES (?, ?, ?, ?, ?)",
-                     (user_id, selected_class, age_range, name, phone))
+            c.execute("INSERT OR REPLACE INTO users (id, class, age_range, name, phone, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
+                     (user_id, selected_class, age_range, name, phone, timestamp))
             conn.commit()
         except sqlite3.Error as e:
             await update.message.reply_text("خطایی در ذخیره‌سازی اطلاعات رخ داد. لطفاً دوباره امتحان کنید.")
@@ -181,10 +188,77 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             "آیدی: @ircstem",
             reply_markup=ReplyKeyboardRemove()
         )
+        
+        # ارسال پیام معرفی به‌عنوان آخرین پیام
+        await update.message.reply_text(
+            "باشگاه رباتیک موسیتو با هدف پرورش نسل خلاق، نوآور و آشنا با فناوری‌های نوین، فعالیت خود را در حوزه آموزش رباتیک و هوش مصنوعی آغاز کرده و تاکنون میزبان صدها دانش‌آموز علاقه‌مند بوده است. "
+            "در این باشگاه، کودکان و نوجوانان با مباحث پایه تا پیشرفته رباتیک، برنامه‌نویسی، الکترونیک، طراحی و ساخت ربات‌های واقعی آشنا می‌شوند و مهارت‌های عملی خود را در فضایی آموزشی، پویا و سرگرم‌کننده ارتقا می‌دهند."
+        )
         return ConversationHandler.END
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
         print(f"خطا در get_phone: {e}")
+        return ConversationHandler.END
+
+async def getdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """مدیریت دستور /getdb و درخواست رمز عبور"""
+    try:
+        await update.message.reply_text(
+            "لطفاً رمز عبور را وارد کنید:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return GETDB_PASSWORD
+    except Exception as e:
+        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا در getdb: {e}")
+        return ConversationHandler.END
+
+async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """تأیید رمز عبور و ارسال فایل JSON"""
+    try:
+        password = update.message.text.strip()
+        if password != "102030":
+            await update.message.reply_text("رمز عبور نادرست است. 😊")
+            return ConversationHandler.END
+        
+        # دریافت اطلاعات از دیتابیس
+        try:
+            c.execute("SELECT id, class, age_range, name, phone, timestamp FROM users")
+            users = c.fetchall()
+        except sqlite3.Error as e:
+            await update.message.reply_text("خطایی در دریافت اطلاعات رخ داد.")
+            print(f"خطای دیتابیس در verify_password: {e}")
+            return ConversationHandler.END
+        
+        # تبدیل اطلاعات به فرمت JSON
+        users_list = [
+            {
+                "id": user[0],
+                "class": user[1],
+                "age_range": user[2],
+                "name": user[3],
+                "phone": user[4],
+                "timestamp": user[5]
+            } for user in users
+        ]
+        
+        # ذخیره JSON در فایل موقت
+        json_file_path = "users_data.json"
+        with open(json_file_path, "w", encoding="utf-8") as f:
+            json.dump(users_list, f, ensure_ascii=False, indent=4)
+        
+        # ارسال فایل JSON
+        with open(json_file_path, "rb") as f:
+            await update.message.reply_document(document=f, filename="users_data.json")
+        
+        # حذف فایل موقت
+        os.remove(json_file_path)
+        
+        await update.message.reply_text("فایل اطلاعات کاربران با موفقیت ارسال شد.")
+        return ConversationHandler.END
+    except Exception as e:
+        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا در verify_password: {e}")
         return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -221,12 +295,16 @@ if __name__ == "__main__":
         app = ApplicationBuilder().token(TOKEN).build()
         
         conv = ConversationHandler(
-            entry_points=[CommandHandler("start", start)],
+            entry_points=[
+                CommandHandler("start", start),
+                CommandHandler("getdb", getdb)
+            ],
             states={
                 CLASS_SELECTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_class)],
                 AGE_SELECTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_age)],
                 NAME_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)],
                 PHONE_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND | filters.CONTACT, get_phone)],
+                GETDB_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, verify_password)],
             },
             fallbacks=[CommandHandler("cancel", cancel)]
         )
