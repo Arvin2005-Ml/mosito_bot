@@ -1,4 +1,4 @@
-from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton
+from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, InputFile
 from telegram.ext import (
     ApplicationBuilder, CommandHandler,
     MessageHandler, ConversationHandler,
@@ -7,6 +7,8 @@ from telegram.ext import (
 import sqlite3
 import os
 import asyncio
+import json
+import io
 from keep_alive import keep_alive
 
 # تعریف مراحل مکالمه
@@ -23,11 +25,12 @@ except sqlite3.Error as e:
     exit(1)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """مدیریت دستور /start و نمایش منوی کلاس‌ها"""
+    """مدیریت دستور /start و نمایش منوی دوره‌ها"""
     try:
         await update.message.reply_text("سلام به باشگاه موسینو خوش آمدید! 😊")
+        await update.message.reply_text("باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است. 🫡")
         
-        # تعریف گزینه‌های کلاس (هر کدام یک دوره جداگانه)
+        # تعریف گزینه‌های دوره
         class_options = [
             ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
             ["کلاس آموزشی هوش مصنوعی", "کلاس زبان انگلیسی تخصصی رباتیک"],
@@ -169,8 +172,12 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text(
             "✅ ممنون از ثبت اطلاعات! 😊\n"
             "برای اطلاعات بیشتر، ما را در اینستاگرام دنبال کنید:\n"
-            "لینک: https://www.instagram.com/musino_academy\n"
-            "آیدی: @MusinoAcademy",
+            "لینک: https://www.instagram.com/ircstem?igsh=dXVvaGpnbTBkYnoy\n"
+            "آیدی: @ircstem",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        await update.message.reply_text(
+            "باشگاه رباتیک موسیتو با هدف پرورش نسل خلاق، نوآور و آشنا با فناوری‌های نوین، فعالیت خود را در حوزه آموزش رباتیک و هوش مصنوعی آغاز کرده و تاکنون میزبان صدها دانش‌آموز علاقه‌مند بوده است. در این باشگاه، کودکان و نوجوانان با مباحث پایه تا پیشرفته رباتیک، برنامه‌نویسی، الکترونیک، طراحی و ساخت ربات‌های واقعی آشنا می‌شوند و مهارت‌های عملی خود را در فضایی آموزشی، پویا و سرگرم‌کننده ارتقا می‌دهند",
             reply_markup=ReplyKeyboardRemove()
         )
         return ConversationHandler.END
@@ -178,6 +185,41 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
         print(f"خطا در get_phone: {e}")
         return ConversationHandler.END
+
+async def get_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """ارسال داده‌های دیتابیس به صورت فایل JSON"""
+    try:
+        # خواندن داده‌ها از جدول users
+        c.execute("SELECT id, class, age_range, name, phone FROM users")
+        rows = c.fetchall()
+        
+        # تبدیل داده‌ها به فرمت JSON
+        users_data = [
+            {
+                "id": row[0],
+                "class": row[1],
+                "age_range": row[2],
+                "name": row[3],
+                "phone": row[4]
+            } for row in rows
+        ]
+        
+        # ایجاد فایل JSON
+        json_data = json.dumps(users_data, ensure_ascii=False, indent=2)
+        json_file = io.BytesIO(json_data.encode('utf-8'))
+        json_file.name = "users_data.json"
+        
+        # ارسال فایل JSON به کاربر
+        await update.message.reply_document(
+            document=InputFile(json_file, filename="users_data.json"),
+            caption="داده‌های دیتابیس به صورت JSON"
+        )
+    except sqlite3.Error as e:
+        await update.message.reply_text("خطایی در دسترسی به دیتابیس رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطای دیتابیس در get_db: {e}")
+    except Exception as e:
+        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا در get_db: {e}")
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت دستور /cancel"""
@@ -194,7 +236,8 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     try:
         if isinstance(context.error, telegram.error.Conflict):
             print("خطای Conflict: نمونه دیگری از ربات در حال اجراست")
-            await update.message.reply_text("ربات در حال حاضر فعال است. لطفاً بعداً امتحان کنید.")
+            if update and update.message:
+                await update.message.reply_text("ربات در حال حاضر فعال است. لطفاً بعداً امتحان کنید.")
         else:
             print(f"خطا: {context.error}")
             if update and update.message:
@@ -202,7 +245,8 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     except Exception as e:
         print(f"خطا در error_handler: {e}")
 
-if __name__ == "__main__":
+async def main():
+    """تابع اصلی برای اجرای ربات"""
     try:
         keep_alive()
         TOKEN = os.environ.get("TOKEN")
@@ -224,19 +268,20 @@ if __name__ == "__main__":
         )
         
         app.add_handler(conv)
+        app.add_handler(CommandHandler("getdb", get_db))
         app.add_error_handler(error_handler)
         
-        # اجرای polling با توقف صحیح
-        loop = asyncio.get_event_loop()
-        try:
-            loop.run_until_complete(app.run_polling(allowed_updates=Update.ALL_TYPES))
-        finally:
-            loop.run_until_complete(app.updater.stop())
-            loop.run_until_complete(app.stop())
-            loop.close()
+        # مقداردهی اولیه و اجرای ربات
+        await app.initialize()
+        await app.start()
+        await app.run_polling(allowed_updates=Update.ALL_TYPES)
+        
     except Exception as e:
         print(f"خطا در main: {e}")
         exit(1)
+    finally:
+        await app.stop()
+        await app.updater.stop()
 
 # بستن اتصال دیتابیس هنگام خروج
 def cleanup():
@@ -248,3 +293,6 @@ def cleanup():
 
 import atexit
 atexit.register(cleanup)
+
+if __name__ == "__main__":
+    asyncio.run(main())
