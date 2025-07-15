@@ -10,12 +10,44 @@ import asyncio
 import json
 from datetime import datetime
 from keep_alive import keep_alive
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 import atexit
 import uvicorn
 
 # تعریف FastAPI برای Webhook
 fastapi_app = FastAPI()
+
+# مسیر ریشه برای جلوگیری از خطای 404
+@fastapi_app.get("/")
+async def root():
+    return {"message": "Welcome to the Telegram Bot API. Use /webhook for bot updates."}
+
+# مسیر GET برای /webhook برای جلوگیری از خطای 405
+@fastapi_app.get("/webhook")
+async def webhook_get():
+    return {"message": "This endpoint only accepts POST requests from Telegram."}
+
+# مسیر جدید برای نمایش داده‌ها به‌صورت JSON
+@fastapi_app.get("/db")
+async def get_db(password: str = None):
+    if password != "102030":
+        raise HTTPException(status_code=403, detail="Invalid password")
+    try:
+        c.execute("SELECT id, class, age_range, name, phone, timestamp FROM users")
+        users = c.fetchall()
+        users_list = [
+            {
+                "id": user[0],
+                "class": user[1],
+                "age_range": user[2],
+                "name": user[3],
+                "phone": user[4],
+                "timestamp": user[5]
+            } for user in users
+        ]
+        return users_list
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 # تعریف مراحل مکالمه
 CLASS_SELECTION, AGE_SELECTION, NAME_INPUT, PHONE_INPUT, GETDB_PASSWORD = range(5)
@@ -226,6 +258,10 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             print(f"خطای دیتابیس در verify_password: {e}")
             return ConversationHandler.END
         
+        if not users:
+            await update.message.reply_text("هیچ کاربری در دیتابیس ثبت نشده است.")
+            return ConversationHandler.END
+        
         users_list = [
             {
                 "id": user[0],
@@ -340,7 +376,7 @@ async def initialize_application():
         application.add_error_handler(error_handler)
         
         # تنظیم Webhook
-        webhook_url = "https://last-mossito.onrender.com"
+        webhook_url = os.environ.get("WEBHOOK_URL", "https://last-mossito.onrender.com")
         if not webhook_url:
             print("خطا: متغیر محیطی WEBHOOK_URL تنظیم نشده است")
             exit(1)
