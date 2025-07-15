@@ -93,6 +93,7 @@ async def main():
     app.add_handler(conv)
     app.add_handler(CommandHandler("db", show_db))
 
+    await app.initialize()
     await app.bot.set_webhook(WEBHOOK_URL)
     await app.start()
     await app.updater.start_webhook(
@@ -102,6 +103,7 @@ async def main():
         webhook_url=WEBHOOK_URL
     )
     await app.updater.idle()
+
 
 if __name__ == "__main__":
     keep_alive()
