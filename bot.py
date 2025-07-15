@@ -76,7 +76,7 @@ async def show_db(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("هنوز اطلاعاتی ذخیره نشده.")
 
 # تنظیم Webhook و شروع
-WEBHOOK_URL = "https://your-app-name.onrender.com/telegram"  # آدرس دامنه رباتت در Render
+WEBHOOK_URL = "https://mosito-bot-1.onrender.com/telegram"  # آدرس دامنه رباتت در Render
 
 async def main():
     app = ApplicationBuilder().token(TOKEN).build()
