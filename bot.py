@@ -1,10 +1,10 @@
-import telegram
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, InputFile
 from telegram.ext import (
     ApplicationBuilder, CommandHandler,
     MessageHandler, ConversationHandler,
     filters, ContextTypes
 )
+from telegram.error import InvalidToken, NetworkError
 import sqlite3
 import os
 import asyncio
@@ -239,7 +239,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """مدیریت خطاهای کلی"""
     try:
-        if isinstance(context.error, telegram.ext.error.ConflictError):
+        if isinstance(context.error, telegram.error.ConflictError):
             print("خطای Conflict: نمونه دیگری از ربات در حال اجراست")
             if update and update.message:
                 await update.message.reply_text("ربات در حال حاضر فعال است. لطفاً بعداً امتحان کنید.")
@@ -291,10 +291,10 @@ async def main():
         print("شروع polling...")
         await app.run_polling(allowed_updates=Update.ALL_TYPES)
         
-    except telegram.ext.error.InvalidToken as e:
+    except InvalidToken as e:
         print(f"خطای توکن: توکن نامعتبر است - {e}")
         raise
-    except telegram.ext.error.NetworkError as e:
+    except NetworkError as e:
         print(f"خطای شبکه: {e}")
         raise
     except Exception as e:
