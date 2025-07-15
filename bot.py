@@ -28,7 +28,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت دستور /start و نمایش منوی دوره‌ها"""
     try:
         await update.message.reply_text("سلام به باشگاه موسینو خوش آمدید! 😊")
-        await update.message.reply_text("باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است. 🫡")
         
         # تعریف گزینه‌های دوره
         class_options = [
@@ -176,10 +175,6 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             "آیدی: @ircstem",
             reply_markup=ReplyKeyboardRemove()
         )
-        await update.message.reply_text(
-            "باشگاه رباتیک موسیتو با هدف پرورش نسل خلاق، نوآور و آشنا با فناوری‌های نوین، فعالیت خود را در حوزه آموزش رباتیک و هوش مصنوعی آغاز کرده و تاکنون میزبان صدها دانش‌آموز علاقه‌مند بوده است. در این باشگاه، کودکان و نوجوانان با مباحث پایه تا پیشرفته رباتیک، برنامه‌نویسی، الکترونیک، طراحی و ساخت ربات‌های واقعی آشنا می‌شوند و مهارت‌های عملی خود را در فضایی آموزشی، پویا و سرگرم‌کننده ارتقا می‌دهند",
-            reply_markup=ReplyKeyboardRemove()
-        )
         return ConversationHandler.END
     except Exception as e:
         await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
@@ -247,6 +242,7 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 async def main():
     """تابع اصلی برای اجرای ربات"""
+    app = None
     try:
         keep_alive()
         TOKEN = os.environ.get("TOKEN")
@@ -278,10 +274,11 @@ async def main():
         
     except Exception as e:
         print(f"خطا در main: {e}")
-        exit(1)
     finally:
-        await app.stop()
-        await app.updater.stop()
+        if app and app.updater and app.updater.running:
+            await app.updater.stop()
+        if app:
+            await app.stop()
 
 # بستن اتصال دیتابیس هنگام خروج
 def cleanup():
