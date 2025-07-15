@@ -11,10 +11,11 @@ import json
 from datetime import datetime
 from keep_alive import keep_alive
 from fastapi import FastAPI, Request
-import atexit  # اضافه کردن ماژول atexit
+import atexit
+import uvicorn
 
 # تعریف FastAPI برای Webhook
-app = FastAPI()
+fastapi_app = FastAPI()
 
 # تعریف مراحل مکالمه
 CLASS_SELECTION, AGE_SELECTION, NAME_INPUT, PHONE_INPUT, GETDB_PASSWORD = range(5)
@@ -176,7 +177,7 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         except sqlite3.Error as e:
             await update.message.reply_text("خطایی در ذخیره‌سازی اطلاعات رخ داد. لطفاً دوباره امتحان کنید.")
             print(f"خطای دیتابیس در get_phone: {e}")
-            return ConversationHandler.END  # اصلاح خطا
+            return ConversationHandler.END
         
         await update.message.reply_text(
             "✅ ممنون از ثبت اطلاعات! 😊\n"
@@ -291,20 +292,24 @@ def release_lock(lock_file):
         os.remove(lock_file)
 
 # Webhook endpoint
-@app.post("/webhook")
+@fastapi_app.post("/webhook")
 async def webhook(request: Request):
+    global application
+    if application is None:
+        raise RuntimeError("Application is not initialized!")
     update = Update.de_json(await request.json(), application.bot)
+    if update is None:
+        print("Invalid update received")
+        return {"status": "error", "message": "Invalid update"}
     await application.process_update(update)
     return {"status": "ok"}
 
 # متغیر جهانی برای application
 application = None
 
-if __name__ == "__main__":
+async def initialize_application():
+    global application
     try:
-        lock_file = acquire_lock()
-        atexit.register(release_lock, lock_file)
-        keep_alive()
         TOKEN = os.environ.get("TOKEN")
         if not TOKEN:
             print("خطا: متغیر محیطی TOKEN تنظیم نشده است")
@@ -312,6 +317,10 @@ if __name__ == "__main__":
         
         application = ApplicationBuilder().token(TOKEN).build()
         
+        # مقداردهی اولیه Application
+        await application.initialize()
+        
+        # تعریف ConversationHandler
         conv = ConversationHandler(
             entry_points=[
                 CommandHandler("start", start),
@@ -331,13 +340,29 @@ if __name__ == "__main__":
         application.add_error_handler(error_handler)
         
         # تنظیم Webhook
-        webhook_url = os.environ.get("WEBHOOK_URL", "https://last-mossito.onrender.com")
+        webhook_url = "https://last-mossito.onrender.com"
+        if not webhook_url:
+            print("خطا: متغیر محیطی WEBHOOK_URL تنظیم نشده است")
+            exit(1)
+        await application.bot.setWebhook(f"{webhook_url}/webhook")
+        print(f"Webhook تنظیم شد: {webhook_url}/webhook")
+        
+    except Exception as e:
+        print(f"خطا در مقداردهی اولیه Application: {e}")
+        exit(1)
+
+if __name__ == "__main__":
+    try:
+        lock_file = acquire_lock()
+        atexit.register(release_lock, lock_file)
+        keep_alive()
+        
+        # مقداردهی اولیه Application
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(application.bot.setWebhook(f"{webhook_url}/webhook"))
+        loop.run_until_complete(initialize_application())
         
         # اجرای FastAPI با uvicorn
-        import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+        uvicorn.run(fastapi_app, host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
         
     except Exception as e:
         print(f"خطا در main: {e}")
