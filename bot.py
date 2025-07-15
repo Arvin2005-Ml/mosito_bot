@@ -27,8 +27,10 @@ except sqlite3.Error as e:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """مدیریت دستور /start و نمایش منوی دوره‌ها"""
     try:
-        await update.message.reply_text("سلام به باشگاه موسینو خوش آمدید! 😊\n"
-                                       "باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است.")
+        await update.message.reply_text(
+            "سلام به باشگاه موسینو خوش آمدید! 😊\n"
+            "باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است."
+        )
         
         # تعریف گزینه‌های دوره
         class_options = [
@@ -245,9 +247,10 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 async def main():
     """تابع اصلی برای اجرای ربات"""
     app = None
-    loop = asyncio.get_event_loop()
     try:
-        keep_alive()
+        # اطمینان از اینکه keep_alive در یک task جداگانه اجرا می‌شود
+        asyncio.create_task(keep_alive())
+        
         TOKEN = os.environ.get("TOKEN")
         if not TOKEN:
             print("خطا: متغیر محیطی TOKEN تنظیم نشده است")
@@ -284,12 +287,20 @@ async def main():
                 if app.updater and app.updater.running:
                     await app.updater.stop()
                 await app.stop()
-                # بستن حلقه رویداد فقط اگر بسته نشده باشد
-                if not loop.is_closed():
-                    loop.run_until_complete(loop.shutdown_asyncgens())
-                    loop.close()
             except Exception as e:
                 print(f"خطا در توقف ربات: {e}")
+            finally:
+                # بستن حلقه رویداد
+                loop = asyncio.get_event_loop()
+                if not loop.is_closed():
+                    try:
+                        tasks = [task for task in asyncio.all_tasks(loop) if task is not asyncio.current_task()]
+                        for task in tasks:
+                            task.cancel()
+                        loop.run_until_complete(loop.shutdown_asyncgens())
+                        loop.close()
+                    except Exception as e:
+                        print(f"خطا در بستن حلقه رویداد: {e}")
 
 # بستن اتصال دیتابیس هنگام خروج
 def cleanup():
