@@ -4,7 +4,7 @@ from telegram.ext import (
     MessageHandler, ConversationHandler,
     filters, ContextTypes
 )
-from telegram.error import InvalidToken, NetworkError
+from telegram.error import InvalidToken, NetworkError, Conflict
 import sqlite3
 import os
 import asyncio
@@ -35,7 +35,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             "باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است."
         )
         
-        # تعریف گزینه‌های دوره
         class_options = [
             ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
             ["کلاس آموزشی هوش مصنوعی", "کلاس زبان انگلیسی تخصصی رباتیک"],
@@ -70,7 +69,6 @@ async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         context.user_data["class"] = selected_class
         
-        # تعریف بازه‌های سنی
         age_options = [
             ["8-10 سال", "10-14 سال"],
             ["14-15 سال", "20-35 سال"]
@@ -100,7 +98,6 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         selected_class = context.user_data.get("class")
         
-        # بررسی محدودیت سنی برای دوره هوش مصنوعی
         if selected_class == "کلاس آموزشی هوش مصنوعی" and age_range == "8-10 سال":
             class_options = [
                 ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
@@ -114,7 +111,6 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         context.user_data["age_range"] = age_range
         
-        # درخواست نام
         await update.message.reply_text(
             "لطفاً نام خود را وارد کنید:",
             reply_markup=ReplyKeyboardRemove()
@@ -136,7 +132,6 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         
         context.user_data["name"] = name
         
-        # درخواست شماره تماس با دکمه اشتراک
         reply_keyboard = [[KeyboardButton("اشتراک شماره تماس", request_contact=True)]]
         await update.message.reply_text(
             "لطفاً شماره تماس خود را با استفاده از دکمه زیر به اشتراک بگذارید:",
@@ -157,7 +152,6 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         else:
             phone = update.message.text.strip()
             print(f"ورود شماره توسط کاربر {update.effective_user.id}: {phone}")
-            # اعتبارسنجی ساده شماره تماس
             if not (phone.startswith("+") and phone[1:].isdigit() or phone.isdigit()) or len(phone) < 7:
                 await update.message.reply_text("لطفاً شماره تماس معتبر وارد کنید یا از دکمه اشتراک استفاده کنید. 😊")
                 return PHONE_INPUT
@@ -167,7 +161,6 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         age_range = context.user_data.get("age_range")
         name = context.user_data.get("name")
         
-        # ذخیره اطلاعات در دیتابیس
         try:
             c.execute("INSERT OR REPLACE INTO users (id, class, age_range, name, phone) VALUES (?, ?, ?, ?, ?)",
                      (user_id, selected_class, age_range, name, phone))
@@ -178,7 +171,6 @@ async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             print(f"خطای دیتابیس در get_phone: {e}")
             return ConversationHandler.END
         
-        # ارسال پیام نهایی و لینک اینستاگرام
         await update.message.reply_text(
             "✅ ممنون از ثبت اطلاعات! 😊\n"
             "باشگاه رباتیک موسیتو با هدف پرورش نسل خلاق، نوآور و آشنا با فناوری‌های نوین، فعالیت خود را در حوزه آموزش رباتیک و هوش مصنوعی آغاز کرده و تاکنون میزبان صدها دانش‌آموز علاقه‌مند بوده است. در این باشگاه، کودکان و نوجوانان با مباحث پایه تا پیشرفته رباتیک، برنامه‌نویسی، الکترونیک، طراحی و ساخت ربات‌های واقعی آشنا می‌شوند و مهارت‌های عملی خود را در فضایی آموزشی، پویا و سرگرم‌کننده ارتقا می‌دهند.\n"
@@ -201,13 +193,7 @@ async def get_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         rows = c.fetchall()
         
         users_data = [
-            {
-                "id": row[0],
-                "class": row[1],
-                "age_range": row[2],
-                "name": row[3],
-                "phone": row[4]
-            } for row in rows
+            {"id": row[0], "class": row[1], "age_range": row[2], "name": row[3], "phone": row[4]} for row in rows
         ]
         
         json_data = json.dumps(users_data, ensure_ascii=False, indent=2)
@@ -239,7 +225,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """مدیریت خطاهای کلی"""
     try:
-        if isinstance(context.error, telegram.error.ConflictError):
+        if isinstance(context.error, Conflict):
             print("خطای Conflict: نمونه دیگری از ربات در حال اجراست")
             if update and update.message:
                 await update.message.reply_text("ربات در حال حاضر فعال است. لطفاً بعداً امتحان کنید.")
@@ -256,8 +242,9 @@ async def main():
     try:
         print("شروع اجرای ربات...")
         # اجرای keep_alive در یک task جداگانه
-        asyncio.create_task(keep_alive())
-        
+        keep_alive_task = asyncio.create_task(keep_alive())
+        print("keep_alive با موفقیت راه‌اندازی شد.")
+
         TOKEN = os.environ.get("TOKEN")
         if not TOKEN:
             print("خطا: متغیر محیطی TOKEN تنظیم نشده است")
@@ -266,7 +253,7 @@ async def main():
 
         app = ApplicationBuilder().token(TOKEN).build()
         print("ربات با موفقیت ساخته شد.")
-        
+
         conv = ConversationHandler(
             entry_points=[CommandHandler("start", start)],
             states={
@@ -282,15 +269,19 @@ async def main():
         app.add_handler(CommandHandler("getdb", get_db))
         app.add_error_handler(error_handler)
         print("هندلرها با موفقیت اضافه شدند.")
-        
-        # مقداردهی اولیه و اجرای ربات
+
         print("شروع مقداردهی اولیه ربات...")
         await app.initialize()
+        print("مقداردهی اولیه ربات با موفقیت انجام شد.")
+
         print("شروع ربات...")
         await app.start()
+        print("ربات با موفقیت شروع شد.")
+
         print("شروع polling...")
         await app.run_polling(allowed_updates=Update.ALL_TYPES)
-        
+        print("polling با موفقیت شروع شد.")
+
     except InvalidToken as e:
         print(f"خطای توکن: توکن نامعتبر است - {e}")
         raise
@@ -307,6 +298,7 @@ async def main():
                 if app.updater and app.updater.running:
                     await app.updater.stop()
                 await app.stop()
+                print("ربات با موفقیت متوقف شد.")
             except Exception as e:
                 print(f"خطا در توقف ربات: {e}")
             finally:
@@ -317,8 +309,9 @@ async def main():
                         tasks = [task for task in asyncio.all_tasks(loop) if task is not asyncio.current_task()]
                         for task in tasks:
                             task.cancel()
-                        await loop.shutdown_asyncgens()  # استفاده از await برای رفع warning
+                        await loop.shutdown_asyncgens()
                         loop.close()
+                        print("حلقه رویداد با موفقیت بسته شد.")
                     except Exception as e:
                         print(f"خطا در بستن حلقه رویداد: {e}")
 
