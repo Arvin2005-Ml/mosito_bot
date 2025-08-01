@@ -16,6 +16,8 @@ import atexit
 import uvicorn
 import pandas as pd
 import requests
+import jdatetime
+from datetime import datetime as dt
 
 # تعریف FastAPI برای Webhook
 fastapi_app = FastAPI()
@@ -23,16 +25,16 @@ fastapi_app = FastAPI()
 # مسیر ریشه
 @fastapi_app.get("/")
 async def root():
-    return {"message": "Welcome to the Telegram Bot API. Use /webhook for bot updates."}
+    return {"message": "خوش اومدی به ربات موسیتو! 😎 برای آپدیت‌های ربات از /webhook استفاده کن."}
 
 @fastapi_app.get("/webhook")
 async def webhook_get():
-    return {"message": "This endpoint only accepts POST requests from Telegram."}
+    return {"message": "اینجا فقط درخواست‌های POST از تلگرام قبول می‌کنیم! 😊"}
 
 @fastapi_app.get("/db")
 async def get_db(password: str = None):
     if password != "102030":
-        raise HTTPException(status_code=403, detail="Invalid password")
+        raise HTTPException(status_code=403, detail="رمز اشتباهه! 😅")
     try:
         c.execute("SELECT id, class, age_range, name, phone, timestamp FROM users")
         users = c.fetchall()
@@ -48,9 +50,9 @@ async def get_db(password: str = None):
         ]
         return users_list
     except sqlite3.Error as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطا تو دیتابیس: {str(e)}")
 
-# مسیر جدید برای دریافت لاگ‌های ورود و خروج
+# مسیر برای دریافت لاگ‌های ورود و خروج
 @fastapi_app.post("/attendance")
 async def receive_attendance(request: Request):
     try:
@@ -65,10 +67,10 @@ async def receive_attendance(request: Request):
             c.execute("INSERT INTO attendance_logs (user_id, name, timestamp, event_type, duration) VALUES (?, ?, ?, ?, ?)",
                      (user_id, name, timestamp, event_type, duration))
         conn.commit()
-        return {"status": "ok", "message": "Attendance logs received"}
+        return {"status": "ok", "message": "لاگ‌های ورود و خروج با موفقیت دریافت شد! 😊"}
     except Exception as e:
         print(f"خطا در دریافت لاگ‌های ورود و خروج: {e}")
-        raise HTTPException(status_code=500, detail=f"Error processing attendance logs: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطا تو پردازش لاگ‌ها: {str(e)}")
 
 # تعریف مراحل مکالمه
 CLASS_SELECTION, AGE_SELECTION, NAME_INPUT, PHONE_INPUT, GETDB_PASSWORD, MANAGE_PASSWORD, BRANCH_SELECTION, MANAGE_MENU, ADD_COURSE_METHOD, ADD_COURSE_MANUAL, EDIT_COURSE, VIEW_COURSES, VIEW_ABSENTEES, CHANGE_BRANCH = range(14)
@@ -89,8 +91,8 @@ try:
     """)
     c.execute("""
         CREATE TABLE IF NOT EXISTS courses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             branch TEXT,
-            course_number TEXT,
             participants TEXT,
             days TEXT,
             start_date TEXT,
@@ -108,299 +110,403 @@ try:
         )
     """)
     conn.commit()
-    print("Database initialized successfully")
+    print("دیتابیس با موفقیت راه‌اندازی شد! 🚀")
 except sqlite3.Error as e:
-    print(f"خطای دیتابیس در راه‌اندازی: {e}")
+    print(f"خطا تو راه‌اندازی دیتابیس: {e}")
     exit(1)
 
 # لیست شعبه‌ها
 BRANCHES = ["تهران", "اصفهان", "شیراز", "مشهد"]
 
+# تابع تبدیل تاریخ شمسی به میلادی
+def shamsi_to_miladi(date_str):
+    try:
+        if "/" in date_str:
+            year, month, day = map(int, date_str.split("/"))
+            j_date = jdatetime.date(year, month, day)
+            g_date = j_date.togregorian()
+            return g_date.strftime("%Y-%m-%d")
+        else:
+            # فرض می‌کنیم تاریخ میلادی است
+            dt.strptime(date_str, "%Y-%m-%d")
+            return date_str
+    except ValueError:
+        return None
+
+# تابع تبدیل تاریخ میلادی به شمسی برای نمایش
+def miladi_to_shamsi(date_str):
+    try:
+        g_date = dt.strptime(date_str, "%Y-%m-%d")
+        j_date = jdatetime.date.fromgregorian(date=g_date)
+        return f"{j_date.year}/{j_date.month:02d}/{j_date.day:02d}"
+    except ValueError:
+        return date_str
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
-        print(f"Received /start from user {update.effective_user.id}")
+        print(f"دریافت /start از کاربر {update.effective_user.id}")
         await update.message.reply_text(
-            "سلام به باشگاه رباتیک موسیتو خوش آمدید! 😊\n"
-            "باشگاه رباتیک موسیتو، جایی برای ساختن آینده‌ای پیشرفته با دست‌های کوچک اما اندیشه‌های بزرگ است. 🫡"
+            "سلام به ربات موسیتو خوش اومدی! 😄\n"
+            "اینجا جاییه که آینده با دستای کوچیک و فکرای بزرگ ساخته میشه! 🚀"
         )
         
         class_options = [
-            ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
-            ["کلاس آموزشی هوش مصنوعی", "کلاس زبان انگلیسی تخصصی رباتیک"],
-            ["دوره‌های آموزشی سلول خورشیدی"]
+            ["کلاس رباتیک", "کلاس پایتون"],
+            ["کلاس هوش مصنوعی", "کلاس زبان تخصصی رباتیک"],
+            ["دوره‌های سلول خورشیدی", "بازگشت ⬅️"]
         ]
         reply_keyboard = ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
         
         await update.message.reply_text(
-            "لطفاً یکی از دوره‌های آموزشی زیر را انتخاب کنید:",
+            "یکی از دوره‌های جذاب زیر رو انتخاب کن: 😊",
             reply_markup=reply_keyboard
         )
         return CLASS_SELECTION
     except Exception as e:
-        print(f"خطا در start برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو start برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def manage(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
-        print(f"User {update.effective_user.id} requested /manage")
+        print(f"کاربر {update.effective_user.id} دستور /manage رو زد")
         await update.message.reply_text(
-            "لطفاً رمز عبور را وارد کنید:",
+            "رمز عبور رو وارد کن تا بریم تو بخش مدیریت! 🔐",
             reply_markup=ReplyKeyboardRemove()
         )
         return MANAGE_PASSWORD
     except Exception as e:
-        print(f"خطا در manage برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو manage برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def verify_manage_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         password = update.message.text.strip()
-        print(f"User {update.effective_user.id} entered manage password: {password}")
+        print(f"کاربر {update.effective_user.id} رمز مدیریت رو وارد کرد: {password}")
         if password != "102030":
-            await update.message.reply_text("رمز عبور نادرست است. 😊")
+            await update.message.reply_text("رمز اشتباهه! یه بار دیگه امتحان کن! 😊")
             return ConversationHandler.END
         
-        reply_keyboard = ReplyKeyboardMarkup([BRANCHES], one_time_keyboard=True, resize_keyboard=True)
+        reply_keyboard = ReplyKeyboardMarkup([BRANCHES + ["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
         await update.message.reply_text(
-            "لطفاً شعبه خود را انتخاب کنید:",
+            "حالا کدوم شعبه رو می‌خوای مدیریت کنی؟ 🏢",
             reply_markup=reply_keyboard
         )
         return BRANCH_SELECTION
     except Exception as e:
-        print(f"خطا در verify_manage_password برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو verify_manage_password برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def select_branch(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         branch = update.message.text
-        print(f"User {update.effective_user.id} selected branch: {branch}")
+        print(f"کاربر {update.effective_user.id} شعبه رو انتخاب کرد: {branch}")
+        if branch == "بازگشت ⬅️":
+            await update.message.reply_text(
+                "رمز عبور رو دوباره وارد کن: 🔐",
+                reply_markup=ReplyKeyboardRemove()
+            )
+            return MANAGE_PASSWORD
         if branch not in BRANCHES:
-            await update.message.reply_text("لطفاً یکی از شعبه‌های موجود را انتخاب کنید. 😊")
+            await update.message.reply_text("لطفاً فقط یکی از شعبه‌های موجود رو انتخاب کن! 😊")
             return BRANCH_SELECTION
         
         context.user_data["branch"] = branch
         manage_options = [
-            ["افزودن دوره", "مشاهده و ویرایش دوره‌ها"],
-            ["نمایش غایبین", "تغییر شعبه"]
+            ["افزودن دوره جدید", "مشاهده و ویرایش دوره‌ها"],
+            ["نمایش غایبین", "تغییر شعبه"],
+            ["بازگشت ⬅️"]
         ]
         reply_keyboard = ReplyKeyboardMarkup(manage_options, one_time_keyboard=True, resize_keyboard=True)
         await update.message.reply_text(
-            f"شعبه {branch} انتخاب شد. لطفاً یکی از گزینه‌ها را انتخاب کنید:",
+            f"شعبه {branch} انتخاب شد! حالا چیکار می‌خوای بکنی؟ 😎",
             reply_markup=reply_keyboard
         )
         return MANAGE_MENU
     except Exception as e:
-        print(f"خطا در select_branch برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو select_branch برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def manage_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         choice = update.message.text
-        print(f"User {update.effective_user.id} selected manage option: {choice}")
-        if choice == "افزودن دوره":
-            reply_keyboard = [["فایل اکسل", "دستی"]]
+        print(f"کاربر {update.effective_user.id} گزینه مدیریت رو انتخاب کرد: {choice}")
+        if choice == "بازگشت ⬅️":
+            reply_keyboard = ReplyKeyboardMarkup([BRANCHES + ["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
             await update.message.reply_text(
-                "لطفاً روش افزودن دوره را انتخاب کنید:",
+                "خب، کدوم شعبه رو می‌خوای؟ 🏢",
+                reply_markup=reply_keyboard
+            )
+            return BRANCH_SELECTION
+        elif choice == "افزودن دوره جدید":
+            reply_keyboard = [["فایل اکسل", "دستی"], ["بازگشت ⬅️"]]
+            await update.message.reply_text(
+                "می‌خوای دوره رو چطور اضافه کنی؟ 📝",
                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
             )
             return ADD_COURSE_METHOD
         elif choice == "مشاهده و ویرایش دوره‌ها":
             branch = context.user_data.get("branch")
-            c.execute("SELECT course_number FROM courses WHERE branch = ?", (branch,))
+            c.execute("SELECT id, start_date, end_date FROM courses WHERE branch = ?", (branch,))
             courses = c.fetchall()
             if not courses:
-                await update.message.reply_text("هیچ دوره‌ای برای این شعبه ثبت نشده است.")
+                await update.message.reply_text("هیچ دوره‌ای تو این شعبه ثبت نشده! 😕")
                 return MANAGE_MENU
-            reply_keyboard = [[course[0] for course in courses]]
+            reply_keyboard = [[str(course[0])] for course in courses] + [["بازگشت ⬅️"]]
             await update.message.reply_text(
-                "لطفاً دوره موردنظر را انتخاب کنید:",
+                "یکی از دوره‌ها رو انتخاب کن: 📚",
                 reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
             )
             return VIEW_COURSES
         elif choice == "نمایش غایبین":
             return await view_absentees(update, context)
         elif choice == "تغییر شعبه":
-            reply_keyboard = ReplyKeyboardMarkup([BRANCHES], one_time_keyboard=True, resize_keyboard=True)
+            reply_keyboard = ReplyKeyboardMarkup([BRANCHES + ["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
             await update.message.reply_text(
-                "لطفاً شعبه جدید را انتخاب کنید:",
+                "خب، کدوم شعبه جدید رو می‌خوای؟ 🏢",
                 reply_markup=reply_keyboard
             )
             return BRANCH_SELECTION
         else:
-            await update.message.reply_text("لطفاً یکی از گزینه‌های منو را انتخاب کنید. 😊")
+            await update.message.reply_text("لطفاً فقط یکی از گزینه‌های منو رو انتخاب کن! 😊")
             return MANAGE_MENU
     except Exception as e:
-        print(f"خطا در manage_menu برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو manage_menu برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def add_course_method(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         method = update.message.text
-        print(f"User {update.effective_user.id} selected add course method: {method}")
-        if method == "فایل اکسل":
+        print(f"کاربر {update.effective_user.id} روش افزودن دوره رو انتخاب کرد: {method}")
+        if method == "بازگشت ⬅️":
+            return await manage_menu(update, context)
+        elif method == "فایل اکسل":
             await update.message.reply_text(
-                "لطفاً فایل اکسل را آپلود کنید (ستون‌ها: course_number, participants, days, start_date, end_date)",
+                "یه فایل اکسل آپلود کن که شامل ستون‌های زیر باشه:\n"
+                "participants, days, start_date, end_date\n"
+                "📌 تاریخ‌ها می‌تونن شمسی (YYYY/MM/DD) یا میلادی (YYYY-MM-DD) باشن!",
                 reply_markup=ReplyKeyboardRemove()
             )
             return ADD_COURSE_METHOD
         elif method == "دستی":
             await update.message.reply_text(
-                "لطفاً شماره دوره را وارد کنید:",
+                "اسامی افراد حاضر در دوره رو وارد کن (با Enter از هم جداشون کن): 😊",
                 reply_markup=ReplyKeyboardRemove()
             )
             context.user_data["course_data"] = {}
             return ADD_COURSE_MANUAL
         else:
-            await update.message.reply_text("لطفاً یکی از گزینه‌های منو را انتخاب کنید. 😊")
+            await update.message.reply_text("لطفاً فقط یکی از گزینه‌های منو رو انتخاب کن! 😊")
             return ADD_COURSE_METHOD
     except Exception as e:
-        print(f"خطا در add_course_method برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو add_course_method برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def add_course_excel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         if not update.message.document:
-            await update.message.reply_text("لطفاً یک فایل اکسل آپلود کنید.")
+            await update.message.reply_text("لطفاً یه فایل اکسل آپلود کن! 📂")
             return ADD_COURSE_METHOD
         file = await update.message.document.get_file()
         file_path = f"temp_{update.effective_user.id}.xlsx"
         await file.download_to_drive(file_path)
         
-        required_columns = ["course_number", "participants", "days", "start_date", "end_date"]
+        required_columns = ["participants", "days", "start_date", "end_date"]
         try:
             df = pd.read_excel(file_path)
             if not all(col in df.columns for col in required_columns):
                 missing = [col for col in required_columns if col not in df.columns]
-                await update.message.reply_text(f"ستون‌های زیر در فایل وجود ندارند: {', '.join(missing)}")
+                await update.message.reply_text(f"این ستون‌ها تو فایلت نیستن: {', '.join(missing)} 😕")
                 os.remove(file_path)
                 return ADD_COURSE_METHOD
             extra_columns = [col for col in df.columns if col not in required_columns]
             if extra_columns:
-                await update.message.reply_text(f"ستون‌های اضافی حذف شدند: {', '.join(extra_columns)}")
+                await update.message.reply_text(f"این ستون‌های اضافی حذف شدن: {', '.join(extra_columns)} 🗑️")
                 df = df[required_columns]
             
             branch = context.user_data.get("branch")
             for _, row in df.iterrows():
-                c.execute("INSERT INTO courses (branch, course_number, participants, days, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)",
-                         (branch, row["course_number"], row["participants"], row["days"], row["start_date"], row["end_date"]))
+                start_date = shamsi_to_miladi(str(row["start_date"]))
+                end_date = shamsi_to_miladi(str(row["end_date"]))
+                if not start_date or not end_date:
+                    await update.message.reply_text("یکی از تاریخ‌ها فرمت درستی نداره! شمسی (YYYY/MM/DD) یا میلادی (YYYY-MM-DD) وارد کن. 😊")
+                    os.remove(file_path)
+                    return ADD_COURSE_METHOD
+                c.execute("INSERT INTO courses (branch, participants, days, start_date, end_date) VALUES (?, ?, ?, ?, ?)",
+                         (branch, str(row["participants"]), str(row["days"]), start_date, end_date))
             conn.commit()
-            await update.message.reply_text("دوره‌ها با موفقیت از فایل اکسل اضافه شدند.")
+            await update.message.reply_text("دوره‌ها با موفقیت اضافه شدن! 🎉 حالا چیکار کنیم؟")
             os.remove(file_path)
             return await manage_menu(update, context)
         except Exception as e:
-            await update.message.reply_text(f"خطا در پردازش فایل اکسل: {str(e)}")
+            await update.message.reply_text(f"خطا تو پردازش فایل اکسل: {str(e)} 😕")
             os.remove(file_path)
             return ADD_COURSE_METHOD
     except Exception as e:
-        print(f"خطا در add_course_excel برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو add_course_excel برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def add_course_manual(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         text = update.message.text.strip()
+        if text == "بازگشت ⬅️":
+            context.user_data.pop("course_data", None)
+            reply_keyboard = [["فایل اکسل", "دستی"], ["بازگشت ⬅️"]]
+            await update.message.reply_text(
+                "می‌خوای دوره رو چطور اضافه کنی؟ 📝",
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
+            )
+            return ADD_COURSE_METHOD
         course_data = context.user_data.get("course_data", {})
-        if "course_number" not in course_data:
-            course_data["course_number"] = text
-            await update.message.reply_text("لطفاً اسامی افراد حاضر در دوره را وارد کنید (با Enter جدا کنید):")
-            context.user_data["course_data"] = course_data
-            return ADD_COURSE_MANUAL
-        elif "participants" not in course_data:
+        if "participants" not in course_data:
             course_data["participants"] = text
-            await update.message.reply_text("لطفاً روزهای برگزاری را وارد کنید (با Enter جدا کنید، مثلاً: شنبه,یکشنبه):")
+            await update.message.reply_text(
+                "روزهای برگزاری دوره رو وارد کن (با کاما جدا کن، مثلاً: شنبه,یکشنبه): 📅",
+                reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+            )
             context.user_data["course_data"] = course_data
             return ADD_COURSE_MANUAL
         elif "days" not in course_data:
             course_data["days"] = text
-            await update.message.reply_text("لطفاً تاریخ شروع دوره (YYYY-MM-DD) را وارد کنید:")
+            await update.message.reply_text(
+                "تاریخ شروع دوره رو وارد کن (شمسی YYYY/MM/DD یا میلادی YYYY-MM-DD): 📅",
+                reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+            )
             context.user_data["course_data"] = course_data
             return ADD_COURSE_MANUAL
         elif "start_date" not in course_data:
-            try:
-                datetime.strptime(text, "%Y-%m-%d")
-                course_data["start_date"] = text
-                await update.message.reply_text("لطفاً تاریخ پایان دوره (YYYY-MM-DD) را وارد کنید:")
-                context.user_data["course_data"] = course_data
+            start_date = shamsi_to_miladi(text)
+            if not start_date:
+                await update.message.reply_text(
+                    "فرمت تاریخ درست نیست! شمسی (YYYY/MM/DD) یا میلادی (YYYY-MM-DD) وارد کن. 😊",
+                    reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+                )
                 return ADD_COURSE_MANUAL
-            except ValueError:
-                await update.message.reply_text("لطفاً تاریخ را با فرمت YYYY-MM-DD وارد کنید.")
-                return ADD_COURSE_MANUAL
+            course_data["start_date"] = start_date
+            await update.message.reply_text(
+                "تاریخ پایان دوره رو وارد کن (شمسی YYYY/MM/DD یا میلادی YYYY-MM-DD): 📅",
+                reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+            )
+            context.user_data["course_data"] = course_data
+            return ADD_COURSE_MANUAL
         else:
-            try:
-                datetime.strptime(text, "%Y-%m-%d")
-                course_data["end_date"] = text
-                branch = context.user_data.get("branch")
-                c.execute("INSERT INTO courses (branch, course_number, participants, days, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)",
-                         (branch, course_data["course_number"], course_data["participants"], course_data["days"], course_data["start_date"], course_data["end_date"]))
-                conn.commit()
-                await update.message.reply_text("دوره با موفقیت اضافه شد.")
-                context.user_data.pop("course_data", None)
-                return await manage_menu(update, context)
-            except ValueError:
-                await update.message.reply_text("لطفاً تاریخ را با فرمت YYYY-MM-DD وارد کنید.")
+            end_date = shamsi_to_miladi(text)
+            if not end_date:
+                await update.message.reply_text(
+                    "فرمت تاریخ درست نیست! شمسی (YYYY/MM/DD) یا میلادی (YYYY-MM-DD) وارد کن. 😊",
+                    reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+                )
                 return ADD_COURSE_MANUAL
+            course_data["end_date"] = end_date
+            branch = context.user_data.get("branch")
+            c.execute("INSERT INTO courses (branch, participants, days, start_date, end_date) VALUES (?, ?, ?, ?, ?)",
+                     (branch, course_data["participants"], course_data["days"], course_data["start_date"], course_data["end_date"]))
+            conn.commit()
+            await update.message.reply_text("دوره جدید با موفقیت اضافه شد! 🎉 حالا چیکار کنیم؟")
+            context.user_data.pop("course_data", None)
+            return await manage_menu(update, context)
     except Exception as e:
-        print(f"خطا در add_course_manual برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو add_course_manual برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def view_courses(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
-        course_number = update.message.text
+        course_id = update.message.text
+        if course_id == "بازگشت ⬅️":
+            return await manage_menu(update, context)
         branch = context.user_data.get("branch")
-        c.execute("SELECT * FROM courses WHERE branch = ? AND course_number = ?", (branch, course_number))
+        c.execute("SELECT * FROM courses WHERE branch = ? AND id = ?", (branch, course_id))
         course = c.fetchone()
         if not course:
-            await update.message.reply_text("دوره یافت نشد.")
+            await update.message.reply_text("این دوره پیدا نشد! 😕")
             return MANAGE_MENU
         context.user_data["selected_course"] = course
-        reply_keyboard = [["شماره دوره", "افراد حاضر"], ["روزهای برگزاری", "تاریخ شروع"], ["تاریخ پایان"]]
+        reply_keyboard = [["افراد حاضر", "روزهای برگزاری"], ["تاریخ شروع", "تاریخ پایان"], ["بازگشت ⬅️"]]
         await update.message.reply_text(
-            f"دوره: {course[1]}\nلطفاً فیلدی که می‌خواهید ویرایش کنید را انتخاب کنید:",
+            f"دوره شماره {course[0]}:\n"
+            f"افراد: {course[2]}\n"
+            f"روزها: {course[3]}\n"
+            f"شروع: {miladi_to_shamsi(course[4])}\n"
+            f"پایان: {miladi_to_shamsi(course[5])}\n"
+            "کدوم بخش رو می‌خوای ویرایش کنی؟ ✏️",
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
         )
         return EDIT_COURSE
     except Exception as e:
-        print(f"خطا در view_courses برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو view_courses برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def edit_course(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         field = update.message.text
-        print(f"User {update.effective_user.id} wants to edit field: {field}")
+        print(f"کاربر {update.effective_user.id} می‌خواد این فیلد رو ویرایش کنه: {field}")
+        if field == "بازگشت ⬅️":
+            branch = context.user_data.get("branch")
+            c.execute("SELECT id, start_date, end_date FROM courses WHERE branch = ?", (branch,))
+            courses = c.fetchall()
+            if not courses:
+                await update.message.reply_text("هیچ دوره‌ای تو این شعبه ثبت نشده! 😕")
+                return MANAGE_MENU
+            reply_keyboard = [[str(course[0])] for course in courses] + [["بازگشت ⬅️"]]
+            await update.message.reply_text(
+                "یکی از دوره‌ها رو انتخاب کن: 📚",
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
+            )
+            return VIEW_COURSES
         context.user_data["edit_field"] = field
         field_map = {
-            "شماره دوره": "course_number",
             "افراد حاضر": "participants",
             "روزهای برگزاری": "days",
             "تاریخ شروع": "start_date",
             "تاریخ پایان": "end_date"
         }
         if field not in field_map:
-            await update.message.reply_text("لطفاً یکی از گزینه‌های منو را انتخاب کنید. 😊")
+            await update.message.reply_text("لطفاً فقط یکی از گزینه‌های منو رو انتخاب کن! 😊")
             return EDIT_COURSE
-        await update.message.reply_text(f"لطفاً مقدار جدید برای {field} را وارد کنید:")
+        if field in ["تاریخ شروع", "تاریخ پایان"]:
+            await update.message.reply_text(
+                f"مقدار جدید برای {field} رو وارد کن (شمسی YYYY/MM/DD یا میلادی YYYY-MM-DD): 📅",
+                reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+            )
+        else:
+            await update.message.reply_text(
+                f"مقدار جدید برای {field} رو وارد کن: ✏️",
+                reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+            )
         return EDIT_COURSE
     except Exception as e:
-        print(f"خطا در edit_course برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو edit_course برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def update_course(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         new_value = update.message.text.strip()
+        if new_value == "بازگشت ⬅️":
+            course = context.user_data.get("selected_course")
+            reply_keyboard = [["افراد حاضر", "روزهای برگزاری"], ["تاریخ شروع", "تاریخ پایان"], ["بازگشت ⬅️"]]
+            await update.message.reply_text(
+                f"دوره شماره {course[0]}:\n"
+                f"افراد: {course[2]}\n"
+                f"روزها: {course[3]}\n"
+                f"شروع: {miladi_to_shamsi(course[4])}\n"
+                f"پایان: {miladi_to_shamsi(course[5])}\n"
+                "کدوم بخش رو می‌خوای ویرایش کنی؟ ✏️",
+                reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
+            )
+            return EDIT_COURSE
         field = context.user_data.get("edit_field")
         course = context.user_data.get("selected_course")
         branch = context.user_data.get("branch")
         field_map = {
-            "شماره دوره": "course_number",
             "افراد حاضر": "participants",
             "روزهای برگزاری": "days",
             "تاریخ شروع": "start_date",
@@ -408,115 +514,135 @@ async def update_course(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         }
         db_field = field_map[field]
         if db_field in ["start_date", "end_date"]:
-            try:
-                datetime.strptime(new_value, "%Y-%m-%d")
-            except ValueError:
-                await update.message.reply_text("لطفاً تاریخ را با فرمت YYYY-MM-DD وارد کنید.")
+            new_value = shamsi_to_miladi(new_value)
+            if not new_value:
+                await update.message.reply_text(
+                    "فرمت تاریخ درست نیست! شمسی (YYYY/MM/DD) یا میلادی (YYYY-MM-DD) وارد کن. 😊",
+                    reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+                )
                 return EDIT_COURSE
-        c.execute(f"UPDATE courses SET {db_field} = ? WHERE branch = ? AND course_number = ?",
-                 (new_value, branch, course[1]))
+        c.execute(f"UPDATE courses SET {db_field} = ? WHERE branch = ? AND id = ?",
+                 (new_value, branch, course[0]))
         conn.commit()
-        await update.message.reply_text(f"{field} با موفقیت به‌روزرسانی شد.")
+        await update.message.reply_text(f"{field} با موفقیت به‌روزرسانی شد! 🎉 حالا چیکار کنیم؟")
         return await manage_menu(update, context)
     except Exception as e:
-        print(f"خطا در update_course برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو update_course برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def view_absentees(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         branch = context.user_data.get("branch")
-        c.execute("SELECT course_number, participants, days, start_date, end_date FROM courses WHERE branch = ?", (branch,))
+        c.execute("SELECT id, participants, days, start_date, end_date FROM courses WHERE branch = ?", (branch,))
         courses = c.fetchall()
         if not courses:
-            await update.message.reply_text("هیچ دوره‌ای برای این شعبه ثبت نشده است.")
+            await update.message.reply_text("هیچ دوره‌ای تو این شعبه ثبت نشده! 😕")
             return MANAGE_MENU
         
-        today = datetime.now().strftime("%Y-%m-%d")
-        today_day = datetime.now().strftime("%A")  # روز هفته به انگلیسی
-        day_map = {
-            "Monday": "دوشنبه",
-            "Tuesday": "سه‌شنبه",
-            "Wednesday": "چهارشنبه",
-            "Thursday": "پنج‌شنبه",
-            "Friday": "جمعه",
-            "Saturday": "شنبه",
-            "Sunday": "یکشنبه"
-        }
-        today_day_persian = day_map.get(today_day, "")
+        today = dt.now().strftime("%Y-%m-%d")
+        today_day = jdatetime.date.fromgregorian(date=dt.now()).strftime("%A")  # روز هفته به فارسی
         
         absentees = []
         for course in courses:
-            course_number, participants, days, start_date, end_date = course
-            if start_date <= today <= end_date and today_day_persian in days.split(","):
+            course_id, participants, days, start_date, end_date = course
+            if start_date <= today <= end_date and today_day in days.split(","):
                 participants_list = participants.split("\n")
                 c.execute("SELECT user_id FROM attendance_logs WHERE event_type = 'entry' AND timestamp LIKE ?", (f"{today}%",))
                 present_ids = [row[0] for row in c.fetchall()]
                 absentees_list = [p for p in participants_list if p.split("_")[-1] not in present_ids]
                 if absentees_list:
-                    absentees.append(f"دوره {course_number}: {', '.join(absentees_list)}")
+                    absentees.append(f"دوره شماره {course_id}: {', '.join(absentees_list)}")
         
         if not absentees:
-            await update.message.reply_text("هیچ غایبی برای امروز یافت نشد.")
+            await update.message.reply_text("امروز هیچ غایبی نداریم! همه سر کلاس بودن! 😎")
         else:
-            await update.message.reply_text("\n".join(absentees))
-        return MANAGE_MENU
+            await update.message.reply_text("غایبین امروز:\n" + "\n".join(absentees))
+        return await manage_menu(update, context)
     except Exception as e:
-        print(f"خطا در view_absentees برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو view_absentees برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         selected_class = update.message.text
-        print(f"User {update.effective_user.id} selected class: {selected_class}")
+        print(f"کاربر {update.effective_user.id} کلاس رو انتخاب کرد: {selected_class}")
+        if selected_class == "بازگشت ⬅️":
+            await update.message.reply_text(
+                "سلام به ربات موسیتو خوش اومدی! 😄\n"
+                "اینجا جاییه که آینده با دستای کوچیک و فکرای بزرگ ساخته میشه! 🚀"
+            )
+            class_options = [
+                ["کلاس رباتیک", "کلاس پایتون"],
+                ["کلاس هوش مصنوعی", "کلاس زبان تخصصی رباتیک"],
+                ["دوره‌های سلول خورشیدی", "بازگشت ⬅️"]
+            ]
+            await update.message.reply_text(
+                "یکی از دوره‌های جذاب زیر رو انتخاب کن: 😊",
+                reply_markup=ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
+            )
+            return CLASS_SELECTION
         valid_classes = [
-            "کلاس آموزشی رباتیک", "کلاس آموزشی پایتون",
-            "کلاس آموزشی هوش مصنوعی", "کلاس زبان انگلیسی تخصصی رباتیک",
-            "دوره‌های آموزشی سلول خورشیدی"
+            "کلاس رباتیک", "کلاس پایتون",
+            "کلاس هوش مصنوعی", "کلاس زبان تخصصی رباتیک",
+            "دوره‌های سلول خورشیدی"
         ]
         
         if selected_class not in valid_classes:
-            await update.message.reply_text("لطفاً فقط یکی از دوره‌های منو را انتخاب کنید. 😊")
+            await update.message.reply_text("لطفاً فقط یکی از کلاس‌های منو رو انتخاب کن! 😊")
             return CLASS_SELECTION
         
         context.user_data["class"] = selected_class
         
         age_options = [
             ["8-10 سال", "10-14 سال"],
-            ["14-15 سال", "20-35 سال"]
+            ["14-15 سال", "20-35 سال"],
+            ["بازگشت ⬅️"]
         ]
         reply_keyboard = ReplyKeyboardMarkup(age_options, one_time_keyboard=True, resize_keyboard=True)
         
         await update.message.reply_text(
-            "شما چند سال سن دارید؟ لطفاً بازه سنی خود را انتخاب کنید:",
+            "چند سالته؟ یه بازه سنی انتخاب کن: 😄",
             reply_markup=reply_keyboard
         )
         return AGE_SELECTION
     except Exception as e:
-        print(f"خطا در get_class برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو get_class برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         age_range = update.message.text
-        print(f"User {update.effective_user.id} selected age range: {age_range}")
+        print(f"کاربر {update.effective_user.id} بازه سنی رو انتخاب کرد: {age_range}")
+        if age_range == "بازگشت ⬅️":
+            class_options = [
+                ["کلاس رباتیک", "کلاس پایتون"],
+                ["کلاس هوش مصنوعی", "کلاس زبان تخصصی رباتیک"],
+                ["دوره‌های سلول خورشیدی", "بازگشت ⬅️"]
+            ]
+            await update.message.reply_text(
+                "یکی از دوره‌های جذاب زیر رو انتخاب کن: 😊",
+                reply_markup=ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
+            )
+            return CLASS_SELECTION
         valid_ages = ["8-10 سال", "10-14 سال", "14-15 سال", "20-35 سال"]
         
         if age_range not in valid_ages:
-            await update.message.reply_text("لطفاً فقط یکی از بازه‌های سنی منو را انتخاب کنید. 😊")
+            await update.message.reply_text("لطفاً فقط یکی از بازه‌های سنی منو رو انتخاب کن! 😊")
             return AGE_SELECTION
         
         selected_class = context.user_data.get("class")
         
-        if selected_class == "کلاس آموزشی هوش مصنوعی" and age_range == "8-10 سال":
+        if selected_class == "کلاس هوش مصنوعی" and age_range == "8-10 سال":
             class_options = [
-                ["کلاس آموزشی رباتیک", "کلاس آموزشی پایتون"],
-                ["کلاس زبان انگلیسی تخصصی رباتیک", "دوره‌های آموزشی سلول خورشیدی"]
+                ["کلاس رباتیک", "کلاس پایتون"],
+                ["کلاس زبان تخصصی رباتیک", "دوره‌های سلول خورشیدی"],
+                ["بازگشت ⬅️"]
             ]
             await update.message.reply_text(
-                "متأسفیم، دوره هوش مصنوعی برای بازه سنی 8-10 سال مناسب نیست. لطفاً دوره دیگری انتخاب کنید.",
+                "اوپس! هوش مصنوعی برای 8-10 سال مناسب نیست. یه کلاس دیگه انتخاب کن! 😊",
                 reply_markup=ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
             )
             return CLASS_SELECTION
@@ -524,115 +650,132 @@ async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         context.user_data["age_range"] = age_range
         
         await update.message.reply_text(
-            "لطفاً نام خود را وارد کنید:",
-            reply_markup=ReplyKeyboardRemove()
+            "اسمت چیه؟ 😄",
+            reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
         )
         return NAME_INPUT
     except Exception as e:
-        print(f"خطا در get_age برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو get_age برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         name = update.message.text.strip()
-        print(f"User {update.effective_user.id} entered name: {name}")
+        print(f"کاربر {update.effective_user.id} اسم وارد کرد: {name}")
+        if name == "بازگشت ⬅️":
+            age_options = [
+                ["8-10 سال", "10-14 سال"],
+                ["14-15 سال", "20-35 سال"],
+                ["بازگشت ⬅️"]
+            ]
+            await update.message.reply_text(
+                "چند سالته؟ یه بازه سنی انتخاب کن: 😄",
+                reply_markup=ReplyKeyboardMarkup(age_options, one_time_keyboard=True, resize_keyboard=True)
+            )
+            return AGE_SELECTION
         if not name or len(name) < 2:
-            await update.message.reply_text("لطفاً نام معتبر (حداقل 2 حرف) وارد کنید. 😊")
+            await update.message.reply_text("لطفاً یه اسم معتبر (حداقل 2 حرف) وارد کن! 😊")
             return NAME_INPUT
         
         context.user_data["name"] = name
         
-        reply_keyboard = [[KeyboardButton("اشتراک شماره تماس", request_contact=True)]]
+        reply_keyboard = [[KeyboardButton("ارسال شماره تماس 📱", request_contact=True)], ["بازگشت ⬅️"]]
         await update.message.reply_text(
-            "لطفاً شماره تماس خود را با استفاده از دکمه زیر به اشتراک بگذارید:",
+            "شماره تماست رو با دکمه زیر برام بفرست: 😄",
             reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
         )
         return PHONE_INPUT
     except Exception as e:
-        print(f"خطا در get_name برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو get_name برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
+        if update.message.text == "بازگشت ⬅️":
+            await update.message.reply_text(
+                "اسمت چیه؟ 😄",
+                reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
+            )
+            return NAME_INPUT
         phone = None
         if update.message.contact:
             phone = update.message.contact.phone_number
-            print(f"User {update.effective_user.id} shared contact: {phone}")
+            print(f"کاربر {update.effective_user.id} شماره تماس رو به اشتراک گذاشت: {phone}")
         else:
             phone = update.message.text.strip()
-            print(f"User {update.effective_user.id} entered phone: {phone}")
+            print(f"کاربر {update.effective_user.id} شماره تماس وارد کرد: {phone}")
             if not (phone.startswith("+") and phone[1:].isdigit() or phone.isdigit()) or len(phone) < 7:
-                await update.message.reply_text("لطفاً شماره تماس معتبر وارد کنید یا از دکمه اشتراک استفاده کنید. 😊")
+                await update.message.reply_text("لطفاً یه شماره تماس معتبر وارد کن یا از دکمه اشتراک استفاده کن! 😊")
                 return PHONE_INPUT
         
         user_id = update.effective_user.id
         selected_class = context.user_data.get("class")
         age_range = context.user_data.get("age_range")
         name = context.user_data.get("name")
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S")
         
         try:
             c.execute("INSERT INTO users (id, class, age_range, name, phone, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
                      (user_id, selected_class, age_range, name, phone, timestamp))
             conn.commit()
-            print(f"User {user_id} data saved successfully")
+            print(f"داده‌های کاربر {user_id} با موفقیت ذخیره شد")
         except sqlite3.Error as e:
-            await update.message.reply_text("خطایی در ذخیره‌سازی اطلاعات رخ داد. لطفاً دوباره امتحان کنید.")
-            print(f"خطای دیتابیس در get_phone برای کاربر {user_id}: {e}")
+            await update.message.reply_text("اوپس! خطایی تو ذخیره اطلاعات پیش اومد. دوباره امتحان کن! 😅")
+            print(f"خطای دیتابیس تو get_phone برای کاربر {user_id}: {e}")
             return ConversationHandler.END
         
         await update.message.reply_text(
-            "✅ ممنون از ثبت اطلاعات! 😊\n"
-            "برای اطلاعات بیشتر، ما را در اینستاگرام دنبال کنید:\n"
+            "مرسی که اطلاعاتت رو ثبت کردی! 🎉\n"
+            "برای خبرهای بیشتر، ما رو تو اینستا دنبال کن:\n"
             "لینک: https://www.instagram.com/ircstem?igsh=dXVvaGpnbTBkYnoy\n"
-            "آیدی: @ircstem",
+            "آیدی: @ircstem 😎",
             reply_markup=ReplyKeyboardRemove()
         )
         
         await update.message.reply_text(
-            "باشگاه رباتیک موسیتو با هدف پرورش نسل خلاق، نوآور و آشنا با فناوری‌های نوین، فعالیت خود را در حوزه آموزش رباتیک و هوش مصنوعی آغاز کرده و تاکنون میزبان صدها دانش‌آموز علاقه‌مند بوده است. "
-            "در این باشگاه، کودکان و نوجوانان با مباحث پایه تا پیشرفته رباتیک، برنامه‌نویسی، الکترونیک، طراحی و ساخت ربات‌های واقعی آشنا می‌شوند و مهارت‌های عملی خود را در فضایی آموزشی، پویا و سرگرم‌کننده ارتقا می‌دهند."
+            "باشگاه رباتیک موسیتو جاییه که بچه‌ها و جوونا با رباتیک، برنامه‌نویسی و تکنولوژی‌های باحال آشنا می‌شن! 🚀 "
+            "ما کلی دانش‌آموز خلاق داریم که دارن چیزای جدید یاد می‌گیرن و آینده رو می‌سازن! 😄"
         )
         return ConversationHandler.END
     except Exception as e:
-        print(f"خطا در get_phone برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو get_phone برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def getdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
-        print(f"User {update.effective_user.id} requested /getdb")
+        print(f"کاربر {update.effective_user.id} دستور /getdb رو زد")
         await update.message.reply_text(
-            "لطفاً رمز عبور را وارد کنید:",
+            "رمز عبور رو وارد کن: 🔐",
             reply_markup=ReplyKeyboardRemove()
         )
         return GETDB_PASSWORD
     except Exception as e:
-        print(f"خطا در getdb برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو getdb برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         password = update.message.text.strip()
-        print(f"User {update.effective_user.id} entered password: {password}")
+        print(f"کاربر {update.effective_user.id} رمز رو وارد کرد: {password}")
         if password != "102030":
-            await update.message.reply_text("رمز عبور نادرست است. 😊")
+            await update.message.reply_text("رمز اشتباهه! یه بار دیگه امتحان کن! 😊")
             return ConversationHandler.END
         
         try:
             c.execute("SELECT id, class, age_range, name, phone, timestamp FROM users")
             users = c.fetchall()
-            print(f"Retrieved {len(users)} users from database")
+            print(f"{len(users)} کاربر از دیتابیس دریافت شد")
         except sqlite3.Error as e:
-            await update.message.reply_text("خطایی در دریافت اطلاعات رخ داد.")
-            print(f"خطای دیتابیس در verify_password برای کاربر {update.effective_user.id}: {e}")
+            await update.message.reply_text("اوپس! خطایی تو دریافت اطلاعات پیش اومد. 😕")
+            print(f"خطای دیتابیس تو verify_password برای کاربر {update.effective_user.id}: {e}")
             return ConversationHandler.END
         
         if not users:
-            await update.message.reply_text("هیچ کاربری در دیتابیس ثبت نشده است.")
+            await update.message.reply_text("هیچ کاربری تو دیتابیس ثبت نشده! 😕")
             return ConversationHandler.END
         
         users_list = [
@@ -655,40 +798,40 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         
         os.remove(json_file_path)
         
-        await update.message.reply_text("فایل اطلاعات کاربران با موفقیت ارسال شد.")
+        await update.message.reply_text("فایل اطلاعات کاربران برات ارسال شد! 🎉")
         return ConversationHandler.END
     except Exception as e:
-        print(f"خطا در verify_password برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو verify_password برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
-        print(f"User {update.effective_user.id} canceled conversation")
-        await update.message.reply_text("لغو شد.", reply_markup=ReplyKeyboardRemove())
+        print(f"کاربر {update.effective_user.id} مکالمه رو کنسل کرد")
+        await update.message.reply_text("مکالمه کنسل شد! 😊 اگه باز خواستی برگرد!", reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
     except Exception as e:
-        print(f"خطا در cancel برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+        print(f"خطا تو cancel برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
 async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         if isinstance(context.error, telegram.error.Conflict):
-            print("خطای Conflict: نمونه دیگری از ربات در حال اجراست")
+            print("خطای Conflict: یه نمونه دیگه از ربات داره اجرا می‌شه")
             if update and update.message:
-                await update.message.reply_text("ربات در حال حاضر فعال است. لطفاً بعداً امتحان کنید.")
+                await update.message.reply_text("ربات الان مشغوله! یه کم دیگه امتحان کن! 😅")
         else:
-            print(f"خطا برای کاربر {update.effective_user.id} در پردازش: {context.error}")
+            print(f"خطا برای کاربر {update.effective_user.id} تو پردازش: {context.error}")
             if update and update.message:
-                await update.message.reply_text("خطایی رخ داد. لطفاً دوباره امتحان کنید.")
+                await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
     except Exception as e:
-        print(f"خطا در error_handler برای کاربر {update.effective_user.id}: {e}")
+        print(f"خطا تو error_handler برای کاربر {update.effective_user.id}: {e}")
 
 def acquire_lock():
     lock_file = "bot.lock"
     if os.path.exists(lock_file):
-        print("خطا: یک نمونه دیگر از ربات در حال اجراست.")
+        print("خطا: یه نمونه دیگه از ربات داره اجرا می‌شه")
         exit(1)
     with open(lock_file, "w") as f:
         f.write(str(os.getpid()))
@@ -702,13 +845,13 @@ def release_lock(lock_file):
 async def webhook(request: Request):
     global application
     if application is None:
-        print("Application is not initialized!")
-        raise RuntimeError("Application is not initialized!")
+        print("اپلیکیشن راه‌اندازی نشده!")
+        raise RuntimeError("اپلیکیشن راه‌اندازی نشده!")
     update = Update.de_json(await request.json(), application.bot)
     if update is None:
-        print("Invalid update received")
-        return {"status": "error", "message": "Invalid update"}
-    print(f"Processing update: {update}")
+        print("آپدیت نامعتبر دریافت شد")
+        return {"status": "error", "message": "آپدیت نامعتبر"}
+    print(f"پردازش آپدیت: {update}")
     await application.process_update(update)
     return {"status": "ok"}
 
@@ -719,13 +862,13 @@ async def initialize_application():
     try:
         TOKEN = os.environ.get("TOKEN")
         if not TOKEN:
-            print("خطا: متغیر محیطی TOKEN تنظیم نشده است")
+            print("خطا: متغیر محیطی TOKEN تنظیم نشده")
             exit(1)
         
         application = ApplicationBuilder().token(TOKEN).build()
         
         await application.initialize()
-        print("Application initialized successfully")
+        print("اپلیکیشن با موفقیت راه‌اندازی شد! 🚀")
         
         conv = ConversationHandler(
             entry_points=[
@@ -752,17 +895,17 @@ async def initialize_application():
         
         application.add_handler(conv)
         application.add_error_handler(error_handler)
-        print("Handlers added successfully")
+        print("هندلرها با موفقیت اضافه شدن! 😊")
         
         webhook_url = os.environ.get("WEBHOOK_URL", "https://last-mossito.onrender.com")
         if not webhook_url:
-            print("خطا: متغیر محیطی WEBHOOK_URL تنظیم نشده است")
+            print("خطا: متغیر محیطی WEBHOOK_URL تنظیم نشده")
             exit(1)
         await application.bot.setWebhook(f"{webhook_url}/webhook")
         print(f"Webhook تنظیم شد: {webhook_url}/webhook")
         
     except Exception as e:
-        print(f"خطا در مقداردهی اولیه Application: {e}")
+        print(f"خطا تو راه‌اندازی اپلیکیشن: {e}")
         exit(1)
 
 if __name__ == "__main__":
@@ -777,7 +920,7 @@ if __name__ == "__main__":
         uvicorn.run(fastapi_app, host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
         
     except Exception as e:
-        print(f"خطا در main: {e}")
+        print(f"خطا تو main: {e}")
         exit(1)
 
 def cleanup():
@@ -785,6 +928,6 @@ def cleanup():
         conn.close()
         print("اتصال دیتابیس بسته شد")
     except Exception as e:
-        print(f"خطا در بستن دیتابیس: {e}")
+        print(f"خطا تو بستن دیتابیس: {e}")
 
 atexit.register(cleanup)
