@@ -116,7 +116,7 @@ except sqlite3.Error as e:
     exit(1)
 
 # لیست شعبه‌ها
-BRANCHES = ["تهران", "اصفهان", "شیراز", "مشهد"]
+BRANCHES = ["باغ کتاب", "چیتگر", "ایران شهر", "قلهک"]
 
 # تابع تبدیل تاریخ شمسی به میلادی
 def shamsi_to_miladi(date_str):
