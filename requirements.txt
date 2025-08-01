@@ -4,3 +4,4 @@ fastapi
 uvicorn==0.23.2
 pandas
 requests
+jdatetime
