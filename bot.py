@@ -18,6 +18,9 @@ import pandas as pd
 import requests
 import jdatetime
 from datetime import datetime as dt
+from openai import OpenAI
+import csv
+import io
 
 # تعریف FastAPI برای Webhook
 fastapi_app = FastAPI()
@@ -36,7 +39,7 @@ async def get_db(password: str = None):
     if password != "102030":
         raise HTTPException(status_code=403, detail="رمز اشتباهه! 😅")
     try:
-        c.execute("SELECT id, class, age_range, name, phone, timestamp FROM users")
+        c.execute("SELECT id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality FROM users")
         users = c.fetchall()
         users_list = [
             {
@@ -45,7 +48,10 @@ async def get_db(password: str = None):
                 "age_range": user[2],
                 "name": user[3],
                 "phone": user[4],
-                "timestamp": user[5]
+                "timestamp": user[5],
+                "conversation_history": user[6],
+                "total_tokens": user[7],
+                "personality": user[8]
             } for user in users
         ]
         return users_list
@@ -73,7 +79,7 @@ async def receive_attendance(request: Request):
         raise HTTPException(status_code=500, detail=f"خطا تو پردازش لاگ‌ها: {str(e)}")
 
 # تعریف مراحل مکالمه
-CLASS_SELECTION, AGE_SELECTION, NAME_INPUT, PHONE_INPUT, GETDB_PASSWORD, MANAGE_PASSWORD, BRANCH_SELECTION, MANAGE_MENU, ADD_COURSE_METHOD, ADD_COURSE_MANUAL, EDIT_COURSE, VIEW_COURSES, VIEW_ABSENTEES, CHANGE_BRANCH = range(14)
+CONVERSATION, GETDB_PASSWORD, MANAGE_PASSWORD, BRANCH_SELECTION, MANAGE_MENU, ADD_COURSE_METHOD, ADD_COURSE_MANUAL, VIEW_COURSES, EDIT_COURSE, VIEW_ABSENTEES = range(10)
 
 # راه‌اندازی دیتابیس
 try:
@@ -86,7 +92,10 @@ try:
             age_range TEXT,
             name TEXT,
             phone TEXT,
-            timestamp TEXT
+            timestamp TEXT,
+            conversation_history TEXT,
+            total_tokens INTEGER,
+            personality TEXT
         )
     """)
     c.execute("""
@@ -127,7 +136,6 @@ def shamsi_to_miladi(date_str):
             g_date = j_date.togregorian()
             return g_date.strftime("%Y-%m-%d")
         else:
-            # فرض می‌کنیم تاریخ میلادی است
             dt.strptime(date_str, "%Y-%m-%d")
             return date_str
     except ValueError:
@@ -142,28 +150,236 @@ def miladi_to_shamsi(date_str):
     except ValueError:
         return date_str
 
+# ایجاد کلاینت OpenAI با GapGPT
+client = OpenAI(base_url='https://api.gapgpt.app/v1', api_key=os.environ.get("GAPGPT_API_KEY"))
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
         print(f"دریافت /start از کاربر {update.effective_user.id}")
-        await update.message.reply_text(
+        initial_message = (
             "سلام به ربات موسیتو خوش اومدی! 😄\n"
-            "اینجا جاییه که آینده با دستای کوچیک و فکرای بزرگ ساخته میشه! 🚀"
+            "اینجا جاییه که آینده با دستای کوچیک و فکرای بزرگ ساخته میشه! 🚀\n"
+            "چی می‌خوای بدونی یا انجام بدی؟ مثلاً ثبت‌نام در کلاس، مدیریت دوره‌ها، یا هر چیز دیگه!"
         )
+        await update.message.reply_text(initial_message, reply_markup=ReplyKeyboardRemove())
         
-        class_options = [
-            ["کلاس رباتیک", "کلاس پایتون"],
-            ["کلاس هوش مصنوعی", "کلاس زبان تخصصی رباتیک"],
-            ["دوره‌های سلول خورشیدی", "بازگشت ⬅️"]
-        ]
-        reply_keyboard = ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
-        
-        await update.message.reply_text(
-            "یکی از دوره‌های جذاب زیر رو انتخاب کن: 😊",
-            reply_markup=reply_keyboard
+        # تنظیم سیستم پرامپت انگلیسی
+        system_prompt = (
+            "You are a helpful assistant for Musito robotics club Telegram bot. "
+            "Respond in Persian with emojis. Handle user registration by collecting: class (options: کلاس رباتیک, کلاس پایتون, کلاس هوش مصنوعی, کلاس زبان تخصصی رباتیک, دوره‌های سلول خورشیدی), "
+            "age_range (options: 8-10 سال, 10-14 سال, 14-15 سال, 20-35 سال), name, phone. "
+            "Validate: AI class not suitable for 8-10 years. "
+            "User may provide multiple info at once (e.g., 'من نازنین محمدی هستم، می‌خوام تو کلاس رباتیک برای 10-14 سال ثبت‌نام کنم، شماره‌ام 09123456789'), extract them. "
+            "Ask one question at a time if not all info provided, remember previous answers (memory is important). "
+            "If info incomplete, ask for clarification. "
+            "For management (/manage), ask for password (102030), then handle branch selection, add/edit courses, view absentees. "
+            "If all registration data collected, output JSON: {'action': 'register', 'data': {'class': value, 'age_range': value, 'name': value, 'phone': value}}. "
+            "For management actions, output JSON like {'action': 'manage', 'subaction': 'add_course', ...}. "
+            "Keep responses natural, no menus. Guide user step by step with memory of previous responses."
         )
-        return CLASS_SELECTION
+        context.user_data['conversation_history'] = [{"role": "system", "content": system_prompt}]
+        context.user_data['total_tokens'] = 0
+        return CONVERSATION
     except Exception as e:
         print(f"خطا تو start برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
+        return ConversationHandler.END
+
+async def conversation_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    try:
+        user_message = update.message.text.strip() if update.message.text else ""
+        if update.message.contact:
+            user_message += f" شماره تماس: {update.message.contact.phone_number}"
+        elif update.message.document:
+            user_message += " فایل اکسل آپلود شد"
+        
+        print(f"پیام کاربر {update.effective_user.id}: {user_message}")
+        
+        # اضافه کردن پیام کاربر به تاریخچه
+        context.user_data['conversation_history'].append({"role": "user", "content": user_message})
+        
+        # فراخوانی API
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=context.user_data['conversation_history'],
+            temperature=0.7,
+        )
+        
+        ai_response = response.choices[0].message.content
+        print(f"پاسخ AI: {ai_response}")
+        tokens_used = response.usage.total_tokens
+        context.user_data['total_tokens'] += tokens_used
+        print(f"توکن‌های مصرف‌شده کل: {context.user_data['total_tokens']}")
+        
+        # اضافه کردن پاسخ AI به تاریخچه
+        context.user_data['conversation_history'].append({"role": "assistant", "content": ai_response})
+        
+        # بررسی اگر پاسخ JSON دارد
+        try:
+            if '{' in ai_response and '}' in ai_response:
+                json_str = ai_response[ai_response.find('{'):ai_response.rfind('}')+1]
+                parsed_json = json.loads(json_str)
+            else:
+                parsed_json = None
+        except json.JSONDecodeError:
+            parsed_json = None
+        
+        if parsed_json and 'action' in parsed_json:
+            action = parsed_json['action']
+            if action == 'register':
+                data = parsed_json.get('data', {})
+                user_id = update.effective_user.id
+                selected_class = data.get('class')
+                age_range = data.get('age_range')
+                name = data.get('name')
+                phone = data.get('phone')
+                if selected_class and age_range and name and phone:
+                    # اعتبارسنجی
+                    if selected_class == "کلاس هوش مصنوعی" and age_range == "8-10 سال":
+                        await update.message.reply_text("اوپس! هوش مصنوعی برای 8-10 سال مناسب نیست. یه کلاس دیگه انتخاب کن! 😊")
+                        return CONVERSATION
+                    timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S")
+                    history = json.dumps(context.user_data['conversation_history'], ensure_ascii=False)
+                    
+                    # تخمین شخصیت کاربر
+                    personality_prompt = [{"role": "system", "content": "بر اساس تاریخچه مکالمه، شخصیت کاربر را در یک جمله تخمین بزن."}] + context.user_data['conversation_history']
+                    personality_response = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=personality_prompt,
+                    )
+                    personality = personality_response.choices[0].message.content
+                    context.user_data['total_tokens'] += personality_response.usage.total_tokens
+                    
+                    c.execute("INSERT INTO users (id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                             (user_id, selected_class, age_range, name, phone, timestamp, history, context.user_data['total_tokens'], personality))
+                    conn.commit()
+                    await update.message.reply_text(
+                        "مرسی که اطلاعاتت رو ثبت کردی! 🎉\n"
+                        f"مجموع توکن‌های مصرف‌شده برای مکالمه: {context.user_data['total_tokens']}\n"
+                        f"شخصیت احتمالی شما: {personality}\n"
+                        "برای خبرهای بیشتر، ما رو تو اینستا دنبال کن:\n"
+                        "لینک: https://www.instagram.com/ircstem?igsh=dXVvaGpnbTBkYnoy\n"
+                        "آیدی: @ircstem 😎"
+                    )
+                    await update.message.reply_text(
+                        "باشگاه رباتیک موسیتو جاییه که بچه‌ها و جوونا با رباتیک، برنامه‌نویسی و تکنولوژی‌های باحال آشنا می‌شن! 🚀 "
+                        "ما کلی دانش‌آموز خلاق داریم که دارن چیزای جدید یاد می‌گیرن و آینده رو می‌سازن! 😄"
+                    )
+                    return ConversationHandler.END
+                else:
+                    await update.message.reply_text(ai_response)
+            elif action == 'manage':
+                subaction = parsed_json.get('subaction')
+                if subaction == 'verify_password':
+                    context.user_data['branch'] = parsed_json.get('data', {}).get('branch')
+                    return MANAGE_MENU
+                elif subaction == 'add_course':
+                    # هندل افزودن دوره
+                    if parsed_json.get('method') == 'excel':
+                        await update.message.reply_text(
+                            "یه فایل اکسل آپلود کن که شامل ستون‌های زیر باشه:\n"
+                            "participants, days, start_date, end_date\n"
+                            "📌 تاریخ‌ها می‌تونن شمسی (YYYY/MM/DD) یا میلادی (YYYY-MM-DD) باشن!"
+                        )
+                        return ADD_COURSE_METHOD
+                    elif parsed_json.get('method') == 'manual':
+                        context.user_data['course_data'] = {}
+                        await update.message.reply_text(
+                            "اسامی افراد حاضر در دوره رو وارد کن (با Enter از هم جداشون کن): 😊"
+                        )
+                        return ADD_COURSE_MANUAL
+                elif subaction == 'view_courses':
+                    branch = context.user_data.get('branch')
+                    c.execute("SELECT id, start_date, end_date FROM courses WHERE branch = ?", (branch,))
+                    courses = c.fetchall()
+                    if not courses:
+                        await update.message.reply_text("هیچ دوره‌ای تو این شعبه ثبت نشده! 😕")
+                        return MANAGE_MENU
+                    reply_keyboard = [[str(course[0])] for course in courses] + [["بازگشت ⬅️"]]
+                    await update.message.reply_text(
+                        "یکی از دوره‌ها رو انتخاب کن: 📚",
+                        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
+                    )
+                    return VIEW_COURSES
+                elif subaction == 'view_absentees':
+                    return await view_absentees(update, context)
+                await update.message.reply_text(ai_response)
+            else:
+                await update.message.reply_text(ai_response)
+        else:
+            await update.message.reply_text(ai_response)
+        
+        return CONVERSATION
+    except Exception as e:
+        print(f"خطا تو conversation_handler برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
+        return ConversationHandler.END
+
+async def getdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    try:
+        print(f"کاربر {update.effective_user.id} دستور /getdb رو زد")
+        await update.message.reply_text(
+            "رمز عبور رو وارد کن: 🔐",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return GETDB_PASSWORD
+    except Exception as e:
+        print(f"خطا تو getdb برای کاربر {update.effective_user.id}: {e}")
+        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
+        return ConversationHandler.END
+
+async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    try:
+        password = update.message.text.strip()
+        print(f"کاربر {update.effective_user.id} رمز رو وارد کرد: {password}")
+        if password != "102030":
+            await update.message.reply_text("رمز اشتباهه! یه بار دیگه امتحان کن! 😊")
+            return ConversationHandler.END
+        
+        try:
+            c.execute("SELECT id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality FROM users")
+            users = c.fetchall()
+            print(f"{len(users)} کاربر از دیتابیس دریافت شد")
+        except sqlite3.Error as e:
+            await update.message.reply_text("اوپس! خطایی تو دریافت اطلاعات پیش اومد. 😕")
+            print(f"خطای دیتابیس تو verify_password برای کاربر {update.effective_user.id}: {e}")
+            return ConversationHandler.END
+        
+        if not users:
+            await update.message.reply_text("هیچ کاربری تو دیتابیس ثبت نشده! 😕")
+            return ConversationHandler.END
+        
+        # ایجاد فایل CSV
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=["id", "class", "age_range", "name", "phone", "timestamp", "conversation_history", "total_tokens", "personality"])
+        writer.writeheader()
+        for user in users:
+            writer.writerow({
+                "id": user[0],
+                "class": user[1],
+                "age_range": user[2],
+                "name": user[3],
+                "phone": user[4],
+                "timestamp": user[5],
+                "conversation_history": user[6],
+                "total_tokens": user[7],
+                "personality": user[8]
+            })
+        
+        csv_file_path = "users_data.csv"
+        with open(csv_file_path, "w", encoding="utf-8") as f:
+            f.write(output.getvalue())
+        
+        with open(csv_file_path, "rb") as f:
+            await update.message.reply_document(document=f, filename="users_data.csv")
+        
+        os.remove(csv_file_path)
+        output.close()
+        
+        await update.message.reply_text("فایل اطلاعات کاربران (CSV) برات ارسال شد! 🎉")
+        return ConversationHandler.END
+    except Exception as e:
+        print(f"خطا تو verify_password برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
@@ -541,7 +757,7 @@ async def view_absentees(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             return MANAGE_MENU
         
         today = dt.now().strftime("%Y-%m-%d")
-        today_day = jdatetime.date.fromgregorian(date=dt.now()).strftime("%A")  # روز هفته به فارسی
+        today_day = jdatetime.date.fromgregorian(date=dt.now()).strftime("%A")
         
         absentees = []
         for course in courses:
@@ -561,247 +777,6 @@ async def view_absentees(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return await manage_menu(update, context)
     except Exception as e:
         print(f"خطا تو view_absentees برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
-        return ConversationHandler.END
-
-async def get_class(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        selected_class = update.message.text
-        print(f"کاربر {update.effective_user.id} کلاس رو انتخاب کرد: {selected_class}")
-        if selected_class == "بازگشت ⬅️":
-            await update.message.reply_text(
-                "سلام به ربات موسیتو خوش اومدی! 😄\n"
-                "اینجا جاییه که آینده با دستای کوچیک و فکرای بزرگ ساخته میشه! 🚀"
-            )
-            class_options = [
-                ["کلاس رباتیک", "کلاس پایتون"],
-                ["کلاس هوش مصنوعی", "کلاس زبان تخصصی رباتیک"],
-                ["دوره‌های سلول خورشیدی", "بازگشت ⬅️"]
-            ]
-            await update.message.reply_text(
-                "یکی از دوره‌های جذاب زیر رو انتخاب کن: 😊",
-                reply_markup=ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
-            )
-            return CLASS_SELECTION
-        valid_classes = [
-            "کلاس رباتیک", "کلاس پایتون",
-            "کلاس هوش مصنوعی", "کلاس زبان تخصصی رباتیک",
-            "دوره‌های سلول خورشیدی"
-        ]
-        
-        if selected_class not in valid_classes:
-            await update.message.reply_text("لطفاً فقط یکی از کلاس‌های منو رو انتخاب کن! 😊")
-            return CLASS_SELECTION
-        
-        context.user_data["class"] = selected_class
-        
-        age_options = [
-            ["8-10 سال", "10-14 سال"],
-            ["14-15 سال", "20-35 سال"],
-            ["بازگشت ⬅️"]
-        ]
-        reply_keyboard = ReplyKeyboardMarkup(age_options, one_time_keyboard=True, resize_keyboard=True)
-        
-        await update.message.reply_text(
-            "چند سالته؟ یه بازه سنی انتخاب کن: 😄",
-            reply_markup=reply_keyboard
-        )
-        return AGE_SELECTION
-    except Exception as e:
-        print(f"خطا تو get_class برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
-        return ConversationHandler.END
-
-async def get_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        age_range = update.message.text
-        print(f"کاربر {update.effective_user.id} بازه سنی رو انتخاب کرد: {age_range}")
-        if age_range == "بازگشت ⬅️":
-            class_options = [
-                ["کلاس رباتیک", "کلاس پایتون"],
-                ["کلاس هوش مصنوعی", "کلاس زبان تخصصی رباتیک"],
-                ["دوره‌های سلول خورشیدی", "بازگشت ⬅️"]
-            ]
-            await update.message.reply_text(
-                "یکی از دوره‌های جذاب زیر رو انتخاب کن: 😊",
-                reply_markup=ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
-            )
-            return CLASS_SELECTION
-        valid_ages = ["8-10 سال", "10-14 سال", "14-15 سال", "20-35 سال"]
-        
-        if age_range not in valid_ages:
-            await update.message.reply_text("لطفاً فقط یکی از بازه‌های سنی منو رو انتخاب کن! 😊")
-            return AGE_SELECTION
-        
-        selected_class = context.user_data.get("class")
-        
-        if selected_class == "کلاس هوش مصنوعی" and age_range == "8-10 سال":
-            class_options = [
-                ["کلاس رباتیک", "کلاس پایتون"],
-                ["کلاس زبان تخصصی رباتیک", "دوره‌های سلول خورشیدی"],
-                ["بازگشت ⬅️"]
-            ]
-            await update.message.reply_text(
-                "اوپس! هوش مصنوعی برای 8-10 سال مناسب نیست. یه کلاس دیگه انتخاب کن! 😊",
-                reply_markup=ReplyKeyboardMarkup(class_options, one_time_keyboard=True, resize_keyboard=True)
-            )
-            return CLASS_SELECTION
-        
-        context.user_data["age_range"] = age_range
-        
-        await update.message.reply_text(
-            "اسمت چیه؟ 😄",
-            reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
-        )
-        return NAME_INPUT
-    except Exception as e:
-        print(f"خطا تو get_age برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
-        return ConversationHandler.END
-
-async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        name = update.message.text.strip()
-        print(f"کاربر {update.effective_user.id} اسم وارد کرد: {name}")
-        if name == "بازگشت ⬅️":
-            age_options = [
-                ["8-10 سال", "10-14 سال"],
-                ["14-15 سال", "20-35 سال"],
-                ["بازگشت ⬅️"]
-            ]
-            await update.message.reply_text(
-                "چند سالته؟ یه بازه سنی انتخاب کن: 😄",
-                reply_markup=ReplyKeyboardMarkup(age_options, one_time_keyboard=True, resize_keyboard=True)
-            )
-            return AGE_SELECTION
-        if not name or len(name) < 2:
-            await update.message.reply_text("لطفاً یه اسم معتبر (حداقل 2 حرف) وارد کن! 😊")
-            return NAME_INPUT
-        
-        context.user_data["name"] = name
-        
-        reply_keyboard = [[KeyboardButton("ارسال شماره تماس 📱", request_contact=True)], ["بازگشت ⬅️"]]
-        await update.message.reply_text(
-            "شماره تماست رو با دکمه زیر برام بفرست: 😄",
-            reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True, resize_keyboard=True)
-        )
-        return PHONE_INPUT
-    except Exception as e:
-        print(f"خطا تو get_name برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
-        return ConversationHandler.END
-
-async def get_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        if update.message.text == "بازگشت ⬅️":
-            await update.message.reply_text(
-                "اسمت چیه؟ 😄",
-                reply_markup=ReplyKeyboardMarkup([["بازگشت ⬅️"]], one_time_keyboard=True, resize_keyboard=True)
-            )
-            return NAME_INPUT
-        phone = None
-        if update.message.contact:
-            phone = update.message.contact.phone_number
-            print(f"کاربر {update.effective_user.id} شماره تماس رو به اشتراک گذاشت: {phone}")
-        else:
-            phone = update.message.text.strip()
-            print(f"کاربر {update.effective_user.id} شماره تماس وارد کرد: {phone}")
-            if not (phone.startswith("+") and phone[1:].isdigit() or phone.isdigit()) or len(phone) < 7:
-                await update.message.reply_text("لطفاً یه شماره تماس معتبر وارد کن یا از دکمه اشتراک استفاده کن! 😊")
-                return PHONE_INPUT
-        
-        user_id = update.effective_user.id
-        selected_class = context.user_data.get("class")
-        age_range = context.user_data.get("age_range")
-        name = context.user_data.get("name")
-        timestamp = dt.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        try:
-            c.execute("INSERT INTO users (id, class, age_range, name, phone, timestamp) VALUES (?, ?, ?, ?, ?, ?)",
-                     (user_id, selected_class, age_range, name, phone, timestamp))
-            conn.commit()
-            print(f"داده‌های کاربر {user_id} با موفقیت ذخیره شد")
-        except sqlite3.Error as e:
-            await update.message.reply_text("اوپس! خطایی تو ذخیره اطلاعات پیش اومد. دوباره امتحان کن! 😅")
-            print(f"خطای دیتابیس تو get_phone برای کاربر {user_id}: {e}")
-            return ConversationHandler.END
-        
-        await update.message.reply_text(
-            "مرسی که اطلاعاتت رو ثبت کردی! 🎉\n"
-            "برای خبرهای بیشتر، ما رو تو اینستا دنبال کن:\n"
-            "لینک: https://www.instagram.com/ircstem?igsh=dXVvaGpnbTBkYnoy\n"
-            "آیدی: @ircstem 😎",
-            reply_markup=ReplyKeyboardRemove()
-        )
-        
-        await update.message.reply_text(
-            "باشگاه رباتیک موسیتو جاییه که بچه‌ها و جوونا با رباتیک، برنامه‌نویسی و تکنولوژی‌های باحال آشنا می‌شن! 🚀 "
-            "ما کلی دانش‌آموز خلاق داریم که دارن چیزای جدید یاد می‌گیرن و آینده رو می‌سازن! 😄"
-        )
-        return ConversationHandler.END
-    except Exception as e:
-        print(f"خطا تو get_phone برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
-        return ConversationHandler.END
-
-async def getdb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        print(f"کاربر {update.effective_user.id} دستور /getdb رو زد")
-        await update.message.reply_text(
-            "رمز عبور رو وارد کن: 🔐",
-            reply_markup=ReplyKeyboardRemove()
-        )
-        return GETDB_PASSWORD
-    except Exception as e:
-        print(f"خطا تو getdb برای کاربر {update.effective_user.id}: {e}")
-        await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
-        return ConversationHandler.END
-
-async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    try:
-        password = update.message.text.strip()
-        print(f"کاربر {update.effective_user.id} رمز رو وارد کرد: {password}")
-        if password != "102030":
-            await update.message.reply_text("رمز اشتباهه! یه بار دیگه امتحان کن! 😊")
-            return ConversationHandler.END
-        
-        try:
-            c.execute("SELECT id, class, age_range, name, phone, timestamp FROM users")
-            users = c.fetchall()
-            print(f"{len(users)} کاربر از دیتابیس دریافت شد")
-        except sqlite3.Error as e:
-            await update.message.reply_text("اوپس! خطایی تو دریافت اطلاعات پیش اومد. 😕")
-            print(f"خطای دیتابیس تو verify_password برای کاربر {update.effective_user.id}: {e}")
-            return ConversationHandler.END
-        
-        if not users:
-            await update.message.reply_text("هیچ کاربری تو دیتابیس ثبت نشده! 😕")
-            return ConversationHandler.END
-        
-        users_list = [
-            {
-                "id": user[0],
-                "class": user[1],
-                "age_range": user[2],
-                "name": user[3],
-                "phone": user[4],
-                "timestamp": user[5]
-            } for user in users
-        ]
-        
-        json_file_path = "users_data.json"
-        with open(json_file_path, "w", encoding="utf-8") as f:
-            json.dump(users_list, f, ensure_ascii=False, indent=4)
-        
-        with open(json_file_path, "rb") as f:
-            await update.message.reply_document(document=f, filename="users_data.json")
-        
-        os.remove(json_file_path)
-        
-        await update.message.reply_text("فایل اطلاعات کاربران برات ارسال شد! 🎉")
-        return ConversationHandler.END
-    except Exception as e:
-        print(f"خطا تو verify_password برای کاربر {update.effective_user.id}: {e}")
         await update.message.reply_text("اوپس! یه مشکلی پیش اومد. دوباره امتحان کن! 😅")
         return ConversationHandler.END
 
@@ -877,18 +852,19 @@ async def initialize_application():
                 CommandHandler("manage", manage)
             ],
             states={
-                CLASS_SELECTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_class)],
-                AGE_SELECTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_age)],
-                NAME_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_name)],
-                PHONE_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND | filters.CONTACT, get_phone)],
+                CONVERSATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, conversation_handler),
+                               MessageHandler(filters.CONTACT, conversation_handler),
+                               MessageHandler(filters.Document.ALL, conversation_handler)],
                 GETDB_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, verify_password)],
                 MANAGE_PASSWORD: [MessageHandler(filters.TEXT & ~filters.COMMAND, verify_manage_password)],
                 BRANCH_SELECTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, select_branch)],
                 MANAGE_MENU: [MessageHandler(filters.TEXT & ~filters.COMMAND, manage_menu)],
-                ADD_COURSE_METHOD: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_course_method), MessageHandler(filters.Document.ALL, add_course_excel)],
+                ADD_COURSE_METHOD: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_course_method),
+                                    MessageHandler(filters.Document.ALL, add_course_excel)],
                 ADD_COURSE_MANUAL: [MessageHandler(filters.TEXT & ~filters.COMMAND, add_course_manual)],
                 VIEW_COURSES: [MessageHandler(filters.TEXT & ~filters.COMMAND, view_courses)],
                 EDIT_COURSE: [MessageHandler(filters.TEXT & ~filters.COMMAND, edit_course)],
+                VIEW_ABSENTEES: [MessageHandler(filters.TEXT & ~filters.COMMAND, view_absentees)],
             },
             fallbacks=[CommandHandler("cancel", cancel)]
         )
