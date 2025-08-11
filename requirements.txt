@@ -1,7 +1,9 @@
 python-telegram-bot==20.3
-flask
+sqlite3-binary
+aiohttp
 fastapi
-uvicorn==0.23.2
+uvicorn
 pandas
 requests
 jdatetime
+openai
