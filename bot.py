@@ -151,7 +151,7 @@ def miladi_to_shamsi(date_str):
         return date_str
 
 # ایجاد کلاینت OpenAI با GapGPT
-client = OpenAI(base_url='https://api.gapgpt.app/v1', api_key=os.environ.get("GAPGPT_API_KEY"))
+client = OpenAI(base_url='https://api.gapgpt.app/v1', api_key="sk-Vs9D8sfJaTjAGDy1Q5a8L3dxlu51UzIhGr23fJxnsZuCN1Hj")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     try:
