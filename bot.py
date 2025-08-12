@@ -39,7 +39,7 @@ async def get_db(password: str = None):
     if password != "102030":
         raise HTTPException(status_code=403, detail="رمز اشتباهه! 😅")
     try:
-        c.execute("SELECT id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality FROM users")
+        c.execute("SELECT id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality, mood FROM users")
         users = c.fetchall()
         users_list = [
             {
@@ -51,7 +51,8 @@ async def get_db(password: str = None):
                 "timestamp": user[5],
                 "conversation_history": user[6],
                 "total_tokens": user[7],
-                "personality": user[8]
+                "personality": user[8],
+                "mood": user[9]
             } for user in users
         ]
         return users_list
@@ -95,7 +96,8 @@ try:
             timestamp TEXT,
             conversation_history TEXT,
             total_tokens INTEGER,
-            personality TEXT
+            personality TEXT,
+            mood TEXT
         )
     """)
     c.execute("""
@@ -177,6 +179,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             "For management actions, output JSON like {'action': 'manage', 'subaction': 'add_course', ...}. "
             "Keep responses natural, no menus. Guide user step by step with memory of previous responses."
         )
+        system_prompt2 = """ 
+        You are a helpful AI assistant for Musito robotics club Telegram bot. Start with a warm greeting, explaining you're an AI here to assist with registrations for classes (robotics, Python, AI, specialized robotics English, solar cell courses). Provide clear details in the first message about class options, age ranges (8-10 years, 10-14 years, 14-15 years, 20-35 years), and simple registration steps.
+
+        Respond in Persian with emojis, keeping responses short, natural, and human-like—avoid lists, chat like a friendly helper. Use memory to track user info and guide step-by-step without repeating questions. Extract info smartly if user provides multiple details at once (e.g., 'من نازنین محمدی هستم، می‌خوام تو کلاس رباتیک برای ۱۰-۱۴ سال ثبت‌نام کنم، شماره‌ام ۰۹۱۲۳۴۵۶۷۸۹').
+
+        Validate: AI class not for 8-10 years—suggest alternatives politely if invalid.
+        Ask one question at a time if info incomplete, using memory. Clarify naturally if needed.
+        For management (/manage), request password (102030), then handle branch selection, add/edit courses, view absentees.
+        Output JSON for registration: {'action': 'register', 'data': {'class': value, 'age_range': value, 'name': value, 'phone': value}}.
+        For management, output JSON like {'action': 'manage', 'subaction': 'add_course', ...}.
+        Instead of asking about user's mood, predict it from conversation tone (e.g., quick/positive responses = good mood, short/vague = neutral/tired) and include in JSON output as {'mood': 'predicted_mood'}.
+        """
         context.user_data['conversation_history'] = [{"role": "system", "content": system_prompt}]
         context.user_data['total_tokens'] = 0
         return CONVERSATION
@@ -228,6 +242,7 @@ async def conversation_handler(update: Update, context: ContextTypes.DEFAULT_TYP
             action = parsed_json['action']
             if action == 'register':
                 data = parsed_json.get('data', {})
+                mood = parsed_json.get('mood', 'unknown')
                 user_id = update.effective_user.id
                 selected_class = data.get('class')
                 age_range = data.get('age_range')
@@ -250,8 +265,8 @@ async def conversation_handler(update: Update, context: ContextTypes.DEFAULT_TYP
                     personality = personality_response.choices[0].message.content
                     context.user_data['total_tokens'] += personality_response.usage.total_tokens
                     
-                    c.execute("INSERT INTO users (id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                             (user_id, selected_class, age_range, name, phone, timestamp, history, context.user_data['total_tokens'], personality))
+                    c.execute("INSERT INTO users (id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality, mood) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                             (user_id, selected_class, age_range, name, phone, timestamp, history, context.user_data['total_tokens'], personality, mood))
                     conn.commit()
                     await update.message.reply_text(
                         "مرسی که اطلاعاتت رو ثبت کردی! 🎉\n"
@@ -337,7 +352,7 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             return ConversationHandler.END
         
         try:
-            c.execute("SELECT id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality FROM users")
+            c.execute("SELECT id, class, age_range, name, phone, timestamp, conversation_history, total_tokens, personality, mood FROM users")
             users = c.fetchall()
             print(f"{len(users)} کاربر از دیتابیس دریافت شد")
         except sqlite3.Error as e:
@@ -351,7 +366,7 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         
         # ایجاد فایل CSV
         output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=["id", "class", "age_range", "name", "phone", "timestamp", "conversation_history", "total_tokens", "personality"])
+        writer = csv.DictWriter(output, fieldnames=["id", "class", "age_range", "name", "phone", "timestamp", "conversation_history", "total_tokens", "personality", "mood"])
         writer.writeheader()
         for user in users:
             writer.writerow({
@@ -363,7 +378,8 @@ async def verify_password(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 "timestamp": user[5],
                 "conversation_history": user[6],
                 "total_tokens": user[7],
-                "personality": user[8]
+                "personality": user[8],
+                "mood": user[9]
             })
         
         csv_file_path = "users_data.csv"
