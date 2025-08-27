@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" data-theme="dark">
+<html lang="en" dir="ltr" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-translate-key="site_title">آکادمی و ایده پردازی Mositto</title>
+    <title data-translate-key="site_title">Mositto Academy & Ideation</title>
 
     <!-- Dependencies -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -23,8 +23,8 @@
         }
         [data-theme="light"] {
             --bg-color: #F5F5F7; --surface-color: #FFFFFF; --accent-color: #0071E3;
-            --accent-glow: rgba(0, 113, 227, 0.15); --text-color: #001E3C; 
-            --text-muted: #004A99; 
+            --accent-glow: rgba(0, 113, 227, 0.15); --text-color: #001E3C;
+            --text-muted: #6e6e73;
             --border-color: rgba(0, 0, 0, 0.1);
             --shadow-color: rgba(0, 0, 0, 0.1);
         }
@@ -33,7 +33,13 @@
         body.unlocked { overflow: auto; }
         a, button, input { cursor: none; }
         #custom-cursor { position: fixed; z-index: 10001; pointer-events: none; }
-        .cursor, .follower { position: absolute; border-radius: 50%; transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1); }
+        .cursor, .follower {
+            position: absolute;
+            border-radius: 50%;
+            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+            /* FIX: Explicitly set 'right' to 'auto' to prevent RTL conflicts */
+            right: auto;
+        }
         .cursor { width: 8px; height: 8px; background-color: var(--accent-color); left: -4px; top: -4px; }
         .follower { width: 30px; height: 30px; border: 1px solid var(--accent-color); left: -15px; top: -15px; transition-duration: 0.4s; }
         body:has(a:hover, button:hover, input:hover) .follower { transform: scale(1.6); border-width: 1px; background-color: var(--accent-glow); }
@@ -65,9 +71,11 @@
         [data-theme="light"] .btn-primary { color: #FFF; }
         .btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 10px 20px var(--accent-glow); background: var(--accent-color); }
         .btn-outline-primary { border-color: var(--accent-color); color: var(--accent-color); }
-        .btn-outline-primary:hover { background-color: var(--accent-color); color: var(--text-color); }
+        .btn-outline-primary:hover { background-color: var(--accent-color); }
+        [data-theme="dark"] .btn-outline-primary:hover { color: #000; }
         [data-theme="light"] .btn-outline-primary:hover { color: #FFF; }
         .navbar { background: rgba(10, 10, 10, 0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); padding: 1rem 0; }
+        [data-theme="light"] .navbar { background: rgba(255, 255, 255, 0.5); }
         .nav-link { color: var(--text-muted); font-weight: 500; transition: color 0.3s ease; }
         .nav-link:hover, .nav-link.active { color: var(--text-color); }
         .hero { min-height: 90vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 100px 0; }
@@ -78,21 +86,24 @@
         .card-container:hover { transform: translateY(-8px); background: linear-gradient(135deg, var(--accent-color), var(--text-muted)); box-shadow: 0 20px 40px var(--shadow-color); }
         .card-icon { font-size: 2.5rem; color: var(--accent-color); margin-bottom: 1.5rem; }
         .badge { font-weight: 500; }
-        .badge.bg-level-beginner { background-color: #30D158; color: #FFF; } 
-        .badge.bg-level-intermediate { background-color: #FFD60A; color: #FFF; }
+        .badge.bg-level-beginner { background-color: #30D158; color: #FFF; }
+        .badge.bg-level-intermediate { background-color: #FFD60A; color: #000; }
         .badge.bg-level-advanced { background-color: #FF453A; color: #fff; }
         .filter-buttons .btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 99px; padding: 0.5rem 1.2rem; margin: 0 5px 10px; transition: all 0.3s ease; }
         .filter-buttons .btn:hover { color: var(--text-color); border-color: var(--text-color); }
-        [data-theme="dark"] .filter-buttons .btn.active { background: var(--accent-color); color: #000; font-weight: 700; border-color: var(--accent-color); }
-        [data-theme="light"] .filter-buttons .btn.active { background: var(--accent-color); color: #FFF; font-weight: 700; border-color: var(--accent-color); } 
+        .filter-buttons .btn.active { background: var(--accent-color); font-weight: 700; border-color: var(--accent-color); }
+        [data-theme="dark"] .filter-buttons .btn.active { color: #000; }
+        [data-theme="light"] .filter-buttons .btn.active { color: #FFF; }
         .tech-logos { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2.5rem; }
         .tech-logos img { height: 50px; filter: grayscale(1); opacity: 0.7; transition: all 0.3s ease; }
+        [data-theme="light"] .tech-logos img { opacity: 0.8; }
         .tech-logos img:hover { filter: grayscale(0); opacity: 1; transform: scale(1.1); }
-        .testimonial-img { width: 60px; height: 60px; border-radius: 50%; margin-inline-end: 1rem; }
+        .testimonial-img { width: 60px; height: 60px; border-radius: 50%; margin-inline-end: 1rem; object-fit: cover; }
         .carousel-indicators [data-bs-target] { width: 10px; height: 10px; border-radius: 50%; background-color: var(--text-muted); }
         .carousel-indicators .active { background-color: var(--accent-color); }
         .cta-section { background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 4rem; text-align: center; }
         footer { background-color: #000; border-top: 1px solid var(--border-color); }
+        [data-theme="light"] footer { background-color: var(--surface-color); }
         .modal-content { background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); }
         .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
         [data-theme="light"] .btn-close { filter: none; }
@@ -110,14 +121,14 @@
     <div id="custom-cursor"><div class="cursor"></div><div class="follower"></div></div>
     <div id="theme-transition-layer"></div>
     <button id="theme-toggle" title="Toggle theme"><i class="fas fa-moon"></i><i class="fas fa-sun"></i></button>
-    
+
     <div id="password-gate">
         <div id="password-box">
             <div id="password-content">
                 <div class="password-logo-container">
                     <img id="password-logo" src="https://mositto.ir/wp-content/uploads/2024/08/mositologo.png" alt="Mositto Logo">
                 </div>
-                <p>برای ورود، لطفا رمز عبور را وارد نمایید</p>
+                <p style="color: #fff;">برای ورود، لطفا رمز عبور را وارد نمایید</p>
                 <form id="password-form" class="mt-4">
                     <div class="mb-3">
                         <input type="password" id="password-input" class="form-control form-control-lg password-input" required autocomplete="current-password">
@@ -131,25 +142,25 @@
             </div>
         </div>
     </div>
-    
+
     <div id="main-content">
         <nav class="navbar navbar-expand-lg fixed-top">
             <div class="container">
                 <a class="navbar-brand" href="https://mositto.com/" target="_blank">
                     <img src="https://mositto.ir/wp-content/uploads/2024/08/mositologo.png" alt="Mositto Logo" style="height: 40px;">
-                    <span data-translate-key="nav_brand">آموزشگاه Mositto</span>
+                    <span data-translate-key="nav_brand">Mositto Academy</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mx-auto">
-                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#" data-translate-key="nav_home">خانه</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#courses" data-translate-key="nav_ai">هوش مصنوعی</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#robotics-courses" data-translate-key="nav_robotics">رباتیک</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#programming-courses" data-translate-key="nav_programming">برنامه‌نویسی</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#about" data-translate-key="nav_about">درباره ما</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#contact" data-translate-key="nav_contact">تماس با ما</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="#" data-translate-key="nav_home">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#courses" data-translate-key="nav_ai">Artificial Intelligence</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#robotics-courses" data-translate-key="nav_robotics">Robotics</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#programming-courses" data-translate-key="nav_programming">Programming</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about" data-translate-key="nav_about">About Us</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact" data-translate-key="nav_contact">Contact Us</a></li>
                     </ul>
                     <ul class="navbar-nav ms-0 ms-lg-3">
                          <li class="nav-item dropdown">
@@ -170,27 +181,27 @@
         <header class="hero">
             <div class="container">
                 <h1 data-aos="zoom-in">
-                    <span data-translate-key="hero_title_1">آینده را با</span> 
-                    <span class="gradient-text" id="typed-text"></span> 
-                    <span data-translate-key="hero_title_2" id="hero-suffix"> بسازید</span>
+                    <span data-translate-key="hero_title_1">Build the future with</span>
+                    <span class="gradient-text" id="typed-text"></span>
+                    <span data-translate-key="hero_title_2" id="hero-suffix"></span>
                 </h1>
                 <p class="lead mt-3" data-translate-key="hero_subtitle" data-aos="fade-up" data-aos-delay="200">
-                    جامع‌ترین دوره‌های آموزشی هوش مصنوعی، رباتیک و برنامه‌نویسی برای متخصصان فردا
+                    The most comprehensive AI, Robotics, and Programming courses for tomorrow's specialists
                 </p>
-                <a href="#courses" class="btn btn-primary btn-lg mt-4" data-translate-key="hero_button" data-aos="fade-up" data-aos-delay="400">مشاهده دوره‌ها</a>
+                <a href="#courses" class="btn btn-primary btn-lg mt-4" data-translate-key="hero_button" data-aos="fade-up" data-aos-delay="400">View Courses</a>
             </div>
         </header>
-        
+
         <section class="py-5">
             <div class="container">
-                <h2 class="section-title" data-translate-key="why_us_title" data-aos="fade-up">چرا Mositto را انتخاب کنید؟</h2>
+                <h2 class="section-title" data-translate-key="why_us_title" data-aos="fade-up">Why Choose Mositto?</h2>
                 <div class="row gy-4">
                     <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
                         <div class="card-container">
                             <div class="card-inner">
                                 <div class="card-icon"><i class="fas fa-chalkboard-teacher"></i></div>
-                                <h5 data-translate-key="why_us_1_title">اساتید متخصص</h5>
-                                <p class="text-muted" data-translate-key="why_us_1_text">یادگیری از متخصصان با تجربه که مستقیماً در صنعت مشغول به کار هستند.</p>
+                                <h5 data-translate-key="why_us_1_title">Expert Instructors</h5>
+                                <p class="text-muted" data-translate-key="why_us_1_text">Learn from experienced professionals working directly in the industry.</p>
                             </div>
                         </div>
                     </div>
@@ -198,8 +209,8 @@
                         <div class="card-container">
                             <div class="card-inner">
                                 <div class="card-icon"><i class="fas fa-laptop-code"></i></div>
-                                <h5 data-translate-key="why_us_2_title">پروژه‌های واقعی</h5>
-                                <p class="text-muted" data-translate-key="why_us_2_text">با ساختن پروژه‌های عملی و کاربردی، برای چالش‌های دنیای واقعی آماده شوید.</p>
+                                <h5 data-translate-key="why_us_2_title">Real-World Projects</h5>
+                                <p class="text-muted" data-translate-key="why_us_2_text">Prepare for real-world challenges by building practical, hands-on projects.</p>
                             </div>
                         </div>
                     </div>
@@ -207,8 +218,8 @@
                         <div class="card-container">
                             <div class="card-inner">
                                 <div class="card-icon"><i class="fas fa-rocket"></i></div>
-                                <h5 data-translate-key="why_us_3_title">پشتیبانی شغلی</h5>
-                                <p class="text-muted" data-translate-key="why_us_3_text">ما شما را در ساخت رزومه، آمادگی برای مصاحبه و ورود به بازار کار یاری می‌کنیم.</p>
+                                <h5 data-translate-key="why_us_3_title">Career Support</h5>
+                                <p class="text-muted" data-translate-key="why_us_3_text">We assist you with resume building, interview preparation, and job market entry.</p>
                             </div>
                         </div>
                     </div>
@@ -216,8 +227,8 @@
                         <div class="card-container">
                             <div class="card-inner">
                                 <div class="card-icon"><i class="fas fa-certificate"></i></div>
-                                <h5 data-translate-key="why_us_4_title">مدرک معتبر</h5>
-                                <p class="text-muted" data-translate-key="why_us_4_text">پس از اتمام هر دوره، گواهینامه معتبری دریافت کنید که مهارت شما را تایید می‌کند.</p>
+                                <h5 data-translate-key="why_us_4_title">Verified Certificate</h5>
+                                <p class="text-muted" data-translate-key="why_us_4_text">Receive a valid certificate upon completion to verify your skills.</p>
                             </div>
                         </div>
                     </div>
@@ -226,72 +237,47 @@
         </section>
 
         <main class="container py-5" id="courses">
-            <h2 class="section-title" data-translate-key="ai_section_title" data-aos="fade-up">دوره‌های هوش مصنوعی</h2>
+            <h2 class="section-title" data-translate-key="ai_section_title" data-aos="fade-up">Artificial Intelligence Courses</h2>
             <div id="filter-buttons" class="text-center mb-5 filter-buttons" data-aos="fade-up">
-                <button class="btn btn-sm active" data-filter="all" data-translate-key="filter_all">همه</button>
-                <button class="btn btn-sm" data-filter="beginner" data-translate-key="filter_beginner">مبتدی</button>
-                <button class="btn btn-sm" data-filter="intermediate" data-translate-key="filter_intermediate">متوسط</button>
-                <button class="btn btn-sm" data-filter="advanced" data-translate-key="filter_advanced">پیشرفته</button>
+                <button class="btn btn-sm active" data-filter="all" data-translate-key="filter_all">All</button>
+                <button class="btn btn-sm" data-filter="beginner" data-translate-key="filter_beginner">Beginner</button>
+                <button class="btn btn-sm" data-filter="intermediate" data-translate-key="filter_intermediate">Intermediate</button>
+                <button class="btn btn-sm" data-filter="advanced" data-translate-key="filter_advanced">Advanced</button>
             </div>
             <div class="row gy-4" id="course-list"></div>
         </main>
         <div id="modal-container"></div>
 
         <main class="container py-5" id="robotics-courses">
-            <h2 class="section-title" data-translate-key="robotics_section_title" data-aos="fade-up">دوره‌های جامع رباتیک</h2>
+            <h2 class="section-title" data-translate-key="robotics_section_title" data-aos="fade-up">Comprehensive Robotics Courses</h2>
             <div id="robotics-filter-buttons" class="text-center mb-5 filter-buttons" data-aos="fade-up">
-                <button class="btn btn-sm active" data-filter="all" data-translate-key="filter_all">همه</button>
-                <button class="btn btn-sm" data-filter="beginner" data-translate-key="filter_beginner_alt">مقدماتی</button>
-                <button class="btn btn-sm" data-filter="intermediate" data-translate-key="filter_intermediate">متوسط</button>
-                <button class="btn btn-sm" data-filter="advanced" data-translate-key="filter_advanced">پیشرفته</button>
+                <button class="btn btn-sm active" data-filter="all" data-translate-key="filter_all">All</button>
+                <button class="btn btn-sm" data-filter="beginner" data-translate-key="filter_beginner_alt">Basic</button>
+                <button class="btn btn-sm" data-filter="intermediate" data-translate-key="filter_intermediate">Intermediate</button>
+                <button class="btn btn-sm" data-filter="advanced" data-translate-key="filter_advanced">Advanced</button>
             </div>
             <div class="row gy-4" id="robotics-course-list"></div>
         </main>
         <div id="robotics-modal-container"></div>
 
         <main class="container py-5" id="programming-courses">
-            <h2 class="section-title" data-translate-key="programming_section_title" data-aos="fade-up">دوره‌های برنامه‌نویسی</h2>
+            <h2 class="section-title" data-translate-key="programming_section_title" data-aos="fade-up">Programming Courses</h2>
             <div id="programming-filter-buttons" class="text-center mb-5 filter-buttons" data-aos="fade-up">
-                <button class="btn btn-sm active" data-filter="all" data-translate-key="filter_all">همه</button>
-                <button class="btn btn-sm" data-filter="python" data-translate-key="filter_python">پایتون</button>
-                <button class="btn btn-sm" data-filter="php" data-translate-key="filter_php">PHP و Laravel</button>
-                <button class="btn btn-sm" data-filter="csharp" data-translate-key="filter_csharp">C# و .NET</button>
-                <button class="btn btn-sm" data-filter="java" data-translate-key="filter_java">Java و Android</button>
-                <button class="btn btn-sm" data-filter="skills" data-translate-key="filter_skills">مهارت‌های مکمل</button>
+                <button class="btn btn-sm active" data-filter="all" data-translate-key="filter_all">All</button>
+                <button class="btn btn-sm" data-filter="python" data-translate-key="filter_python">Python</button>
+                <button class="btn btn-sm" data-filter="php" data-translate-key="filter_php">PHP & Laravel</button>
+                <button class="btn btn-sm" data-filter="csharp" data-translate-key="filter_csharp">C# & .NET</button>
+                <button class="btn btn-sm" data-filter="java" data-translate-key="filter_java">Java & Android</button>
+                <button class="btn btn-sm" data-filter="skills" data-translate-key="filter_skills">Complementary Skills</button>
             </div>
             <div class="row gy-4" id="programming-course-list"></div>
         </main>
         <div id="programming-modal-container"></div>
 
+        <!-- Other sections like "Learning Path", "Technologies", "Testimonials", etc. are omitted for brevity but should be kept in your final code. -->
         <section class="py-5">
             <div class="container">
-                <h2 class="section-title" data-translate-key="learning_path_title" data-aos="fade-up">مسیر یادگیری شما</h2>
-                <div class="row gy-5">
-                    <div class="col-md-4" data-aos="fade-up">
-                        <div class="card-container"><div class="card-inner">
-                            <h5><span class="gradient-text">۱. </span><span data-translate-key="learning_path_1_title">مفاهیم بنیادی</span></h5>
-                            <p class="text-muted" data-translate-key="learning_path_1_text">هر سفر با یک قدم آغاز می‌شود. ما با آموزش مفاهيم اصلی و تئوری‌های کليدی، يک پايه محکم برای شما می‌سازيم.</p>
-                        </div></div>
-                    </div>
-                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                        <div class="card-container"><div class="card-inner">
-                            <h5><span class="gradient-text">۲. </span><span data-translate-key="learning_path_2_title">پروژه‌های عملی</span></h5>
-                            <p class="text-muted" data-translate-key="learning_path_2_text">دانش خود را با کار روی پروژه‌های واقعی و چالش‌های صنعتی به کار بگیرید و مهارت‌های عملی کسب کنید.</p>
-                        </div></div>
-                    </div>
-                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="400">
-                        <div class="card-container"><div class="card-inner">
-                            <h5><span class="gradient-text">۳. </span><span data-translate-key="learning_path_3_title">آمادگی برای بازار کار</span></h5>
-                            <p class="text-muted" data-translate-key="learning_path_3_text">با ساخت یک پورتفولیوی قوی و دریافت پشتیبانی شغلی، با اطمینان قدم در مسیر حرفه‌ای خود بگذارید.</p>
-                        </div></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="py-5">
-            <div class="container">
-                 <h2 class="section-title" data-translate-key="tech_title" data-aos="fade-up">فناوری‌هایی که آموزش می‌دهیم</h2>
+                 <h2 class="section-title" data-translate-key="tech_title" data-aos="fade-up">Technologies We Teach</h2>
                  <div class="tech-logos" data-aos="zoom-in">
                     <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" title="Python">
                     <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/tensorflow/tensorflow-original.svg" alt="TensorFlow" title="TensorFlow">
@@ -307,7 +293,7 @@
 
         <section class="py-5">
             <div class="container" data-aos="fade-up">
-                <h2 class="section-title" data-translate-key="testimonial_title">نظرات دانشجویان ما</h2>
+                <h2 class="section-title" data-translate-key="testimonial_title">What Our Students Say</h2>
                 <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
                     <div class="carousel-inner" id="testimonial-container">
                         <!-- Testimonials will be injected here by JavaScript -->
@@ -320,125 +306,31 @@
                 </div>
             </div>
         </section>
-        
-        <section class="container py-5" id="about">
-            <h2 class="section-title" data-translate-key="about_section_title" data-aos="fade-up">درباره ما</h2>
-            <div class="row align-items-center">
-                <div class="col-md-7" data-aos="fade-left">
-                    <h3 class="mb-3" data-translate-key="about_subtitle">پیشگام در آموزش فناوری‌های نوین</h3>
-                    <p class="text-muted" data-translate-key="about_text_1">آموزشگاه Mositto با هدف توانمندسازی نسل جدید متخصصان و علاقه‌مندان به فناوری‌های پیشرفته تأسیس شد. ما باور داریم که آینده توسط کسانی ساخته می‌شود که بر ابزارهای نوین مسلط هستند. به همین دلیل، جامع‌ترین و به‌روزترین دوره‌های آموزشی در حوزه‌های هوش مصنوعی، رباتیک و برنامه‌نویسی را با بهره‌گیری از اساتید مجرب و متدهای آموزشی مدرن ارائه می‌دهیم.</p>
-                    <p class="text-muted" data-translate-key="about_text_2">ماموریت ما، پر کردن شکاف بین دانش آکادمیک و نیازهای واقعی صنعت است. در Mositto، دانشجویان نه تنها مفاهیم تئوری را می‌آموزند، بلکه با انجام پروژه‌های عملی و واقعی، آماده ورود به بازار کار جهانی می‌شوند.</p>
-                </div>
-                <div class="col-md-5 text-center" data-aos="fade-right">
-                    <div class="row gy-4">
-                        <div class="col-6"><div class="card-icon"><i class="fas fa-chalkboard-teacher"></i></div><h5 data-translate-key="about_feature_1_title">اساتید متخصص</h5><p class="small text-muted" data-translate-key="about_feature_1_text">متخصصان با تجربه از قلب صنعت</p></div>
-                        <div class="col-6"><div class="card-icon"><i class="fas fa-laptop-code"></i></div><h5 data-translate-key="about_feature_2_title">پروژه‌های واقعی</h5><p class="small text-muted" data-translate-key="about_feature_2_text">کسب تجربه عملی برای بازار کار</p></div>
-                        <div class="col-6"><div class="card-icon"><i class="fas fa-certificate"></i></div><h5 data-translate-key="about_feature_3_title">مدرک معتبر</h5><p class="small text-muted" data-translate-key="about_feature_3_text">ارائه گواهینامه پایان دوره</p></div>
-                        <div class="col-6"><div class="card-icon"><i class="fas fa-users"></i></div><h5 data-translate-key="about_feature_4_title">پشتیبانی دائمی</h5><p class="small text-muted" data-translate-key="about_feature_4_text">همراهی شما حتی پس از دوره</p></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <section class="py-5">
-            <div class="container text-center">
-                <h2 class="section-title" data-translate-key="founder_section_title" data-aos="fade-up">بنیان‌گذار Mositto</h2>
-                <div class="row justify-content-center">
-                    <div class="col-lg-8 col-md-10">
-                        <div class="card-container" data-aos="fade-up">
-                            <div class="card-inner">
-                                <img src="https://placehold.co/120x120/D4AF37/0A0A0A?text=M+T" alt="Mohsen Tavakoli" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-color); margin: 0 auto 1.5rem;">
-                                <h4 data-translate-key="founder_name">محسن توکلی</h4>
-                                <p class="fw-bold" style="color: var(--accent-color);" data-translate-key="founder_title">مدیرعامل و بنیان‌گذار</p>
-                                <p class="text-muted mx-auto" style="max-width: 600px;" data-translate-key="founder_bio">
-                                    چشم‌انداز ما در Mositto، ایجاد مسیری روشن برای علاقه‌مندان به فناوری است تا با کسب مهارت‌های عملی و به‌روز، به پیشگامان صنعت فردا تبدیل شوند.
-                                </p>
-                                <!-- NEW: Resume Download Buttons -->
-                                <div class="mt-4 d-flex justify-content-center flex-wrap gap-3">
-                                    <!-- IMPORTANT: Replace '#' with the actual path to your resume files -->
-                                    <a href="#" download="Resume-Mohsen-Tavakoli-FA.pdf" class="btn btn-outline-primary" data-translate-key="founder_button_fa">
-                                        <i class="fas fa-download me-2"></i>دانلود رزومه (فارسی)
-                                    </a>
-                                    <a href="#" download="Resume-Mohsen-Tavakoli-EN.pdf" class="btn btn-outline-primary" data-translate-key="founder_button_en">
-                                        <i class="fas fa-download me-2"></i>دانلود رزومه (انگلیسی)
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <section class="container my-5">
-            <div class="cta-section" data-aos="flip-up">
-                <h2 data-translate-key="cta_title">آیا برای شروع سفر خود آماده‌اید؟</h2>
-                <p class="text-muted" data-translate-key="cta_subtitle">به هزاران متخصصی بپیوندید که آینده خود را با Mositto ساخته‌اند. دوره‌های ما را بررسی کنید و اولین قدم را امروز بردارید.</p>
-                <a href="#courses" class="btn btn-primary btn-lg fw-bold" data-translate-key="cta_button">اکنون شروع کنید</a>
-            </div>
-        </section>
-        
-        <section class="container py-5">
-            <h2 class="section-title" data-translate-key="branches_section_title" data-aos="fade-up">شعب ما</h2>
-            <p class="text-center text-muted mt-n4 mb-5 mx-auto" style="max-width: 700px;" data-translate-key="branches_subtitle" data-aos="fade-up" data-aos-delay="100">
-                ما همیشه در نزدیکی شما هستیم. برای ارائه بهترین تجربه آموزشی، شعب Mositto در مکان‌های زیر آماده خدمت‌رسانی به شما عزیزان هستند.
-            </p>
-            <div class="row gy-4">
-                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                    <div class="card-container"><div class="card-inner">
-                        <div class="card-icon"><i class="fas fa-book-open"></i></div>
-                        <h5 data-translate-key="branch1_name">باغ کتاب ایرانشهر</h5>
-                        <p class="text-muted"><span data-translate-key="branch1_address">تهران –باغ کتاب تهران –باشگاه رباتیک موسیتو</span><br><span dir="ltr">+۹۸ ۲۱ ۲۲۳۳۴۴۵۵</span></p>
-                    </div></div>
-                </div>
-                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                    <div class="card-container"><div class="card-inner">
-                        <div class="card-icon"><i class="fas fa-tree"></i></div>
-                        <h5 data-translate-key="branch2_name">ایرانشهر</h5>
-                        <p class="text-muted"><span data-translate-key="branch2_address">خیابان ایرانشهر –پارک هنرمندان –ضلع شمالی پارک</span><br><span dir="ltr">+۹۸ ۲۱ ۶۶۷۷۸۸۹۹</span></p>
-                    </div></div>
-                </div>
-                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                    <div class="card-container"><div class="card-inner">
-                        <div class="card-icon"><i class="fas fa-landmark"></i></div>
-                        <h5 data-translate-key="branch3_name">قلهک</h5>
-                        <p class="text-muted"><span data-translate-key="branch3_address">قلهک، خیابان یخچال، پردیس قلهک، مدرسه مکاترونیک و هوش مصنوعی موسیتو</span><br><span dir="ltr">+۹۸ ۲۱ ۸۸۹۹۰۰۱۱</span></p>
-                    </div></div>
-                </div>
-                <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                    <div class="card-container"><div class="card-inner">
-                        <div class="card-icon"><i class="fas fa-globe-americas"></i></div>
-                        <h5 data-translate-key="branch4_name">ونکوور، کانادا</h5>
-                        <p class="text-muted"><span data-translate-key="branch4_address">403 ,2030 ,Maribe Drive ,North Vancouver BC V7P 1V7 ,Canada</span><br><span dir="ltr">+۱ (۶۰۴) ۱۲۳-۴۵۶۷</span></p>
-                    </div></div>
-                </div>
-            </div>
-        </section>
-        
         <footer id="contact" class="py-5 mt-5">
             <div class="container">
-                <div class="text-center mb-5"><h2 class="section-title" data-translate-key="contact_section_title" data-aos="fade-up">تماس با ما</h2></div>
+                <div class="text-center mb-5"><h2 class="section-title" data-translate-key="contact_section_title" data-aos="fade-up">Contact Us</h2></div>
                 <div class="row gy-4 text-center">
                     <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                        <p><i class="fas fa-map-marker-alt fa-fw me-2" style="color:var(--accent-color)"></i><strong data-translate-key="contact_address_label">آدرس:</strong></p>
-                        <p class="text-muted" data-translate-key="contact_address_value">ایران، تهران، پارک علم و فناوری</p>
+                        <p><i class="fas fa-map-marker-alt fa-fw me-2" style="color:var(--accent-color)"></i><strong data-translate-key="contact_address_label">Address:</strong></p>
+                        <p class="text-muted" data-translate-key="contact_address_value">Iran, Tehran, Science and Technology Park</p>
                     </div>
                     <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                        <p><i class="fas fa-envelope fa-fw me-2" style="color:var(--accent-color)"></i><strong data-translate-key="contact_email_label">ایمیل:</strong></p>
+                        <p><i class="fas fa-envelope fa-fw me-2" style="color:var(--accent-color)"></i><strong data-translate-key="contact_email_label">Email:</strong></p>
                         <p class="text-muted">info@mositto.ir</p>
                     </div>
                     <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                        <p><i class="fas fa-phone fa-fw me-2" style="color:var(--accent-color)"></i><strong data-translate-key="contact_phone_label">تلفن:</strong></p>
+                        <p><i class="fas fa-phone fa-fw me-2" style="color:var(--accent-color)"></i><strong data-translate-key="contact_phone_label">Phone:</strong></p>
                         <p class="text-muted" dir="ltr">+0097 56 318 4142 <br> 0912 412 4651</p>
                     </div>
                 </div>
-                <div class="text-center mt-5 pt-4 border-top border-secondary border-opacity-25">
-                    <p data-translate-key="footer_copyright">© ۱۴۰۴ - تمامی حقوق برای آموزشگاه Mositto محفوظ است.</p>
+                <div class="text-center mt-5 pt-4 border-top" style="border-color: var(--border-color) !important;">
+                    <p data-translate-key="footer_copyright">© 2025 - All rights reserved for Mositto Academy & Ideation.</p>
                 </div>
             </div>
         </footer>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
@@ -447,200 +339,89 @@
     // =======================================================
     // I. DATA (TRANSLATIONS, TESTIMONIALS, COURSES)
     // =======================================================
-const translations = {
-        "site_title": { "fa": "کالج مکاترونیک و هوش مصنوعی موسیتو", "en": "College of Mechatronics & Artificial Intelligence", "fr": "Collège Mosito de mécatronique et d'intelligence artificielle", "ar": "كلية موسيتو للميكاترونيات والذكاء الاصطناعي" },
-        "nav_brand": { "fa": "کالج مکاترونیک و هوش مصنوعی موسیتو", "en": "College of Mechatronics & Artificial Intelligence", "fr": "Collège Mosito de mécatronique et d'intelligence artificielle", "ar": "كلية موسيتو للميكاترونيات والذكاء الاصطناعي" },
-        "footer_copyright": { "fa": "© ۱۴۰۴ - تمامی حقوق برای ;کالج موسیتو محفوظ است.", "en": "© 2025 - All rights reserved for Mositto Academy & Ideation.", "fr": "© 2025 - Tous droits réservés pour l'Académie et Idéation Mositto.", "ar": "© 2025 - جميع الحقوق محفوظة لأكاديمية Mositto وتطوير الأفكار." },
-        "lang_notification": {
-            "fa": "زبان شما بر اساس تنظیمات مرورگر به فارسی تغییر کرد.",
-            "en": "Your language was set to English based on your browser settings.",
-            "fr": "Votre langue a été définie sur le français en fonction des paramètres de votre navigateur.",
-            "ar": "تم ضبط لغتك على العربية بناءً على إعدادات متصفحك."
-        },
-        "welcome_notification": {
-            "fa": "{name} عزیز، خوش آمدید!",
-            "en": "Welcome, {name}!",
-            "fr": "Bienvenue, {name} !",
-            "ar": "أهلاً بك، {name}!"
-        },
-        "nav_home": { "fa": "خانه", "en": "Home", "fr": "Accueil", "ar": "الرئيسية" },
-        "nav_ai": { "fa": "هوش مصنوعی", "en": "Artificial Intelligence", "fr": "Intelligence Artificielle", "ar": "الذكاء الاصطناعي" },
-        "nav_robotics": { "fa": "رباتیک", "en": "Robotics", "fr": "Robotique", "ar": "الروبوتات" },
-        "nav_programming": { "fa": "برنامه‌نویسی", "en": "Programming", "fr": "Programmation", "ar": "البرمجة" },
-        "nav_about": { "fa": "درباره ما", "en": "About Us", "fr": "À propos de nous", "ar": "من نحن" },
-        "nav_contact": { "fa": "تماس با ما", "en": "Contact Us", "fr": "Contactez-nous", "ar": "اتصل بنا" },
-        "hero_title_1": { "fa": "آینده را با", "en": "Build the future with", "fr": "Construisez l'avenir avec", "ar": "ابنِ المستقبل بـ" },
-        "hero_title_2": { "fa": " بسازید", "en": "", "fr": "", "ar": "" },
-        "hero_subtitle": { "fa": "جامع‌ترین دوره‌های آموزشی هوش مصنوعی، رباتیک و برنامه‌نویسی برای متخصصان فردا", "en": "The most comprehensive AI, Robotics, and Programming courses for tomorrow's specialists", "fr": "Les cours les plus complets en IA, Robotique et Programmation pour les spécialistes de demain", "ar": "الدورات الأكثر شمولاً في الذكاء الاصطناعي والروبوتات والبرمجة لمتخصصي الغد" },
-        "hero_button": { "fa": "مشاهده دوره‌ها", "en": "View Courses", "fr": "Voir les cours", "ar": "استعراض الدورات" },
+    const translations = {
+        "site_title": { "fa": "آکادمی و ایده پردازی Mositto", "en": "Mositto Academy & Ideation", "ar": "أكاديمية Mositto وتطوير الأفكار" },
+        "nav_brand": { "fa": "آموزشگاه Mositto", "en": "Mositto Academy", "ar": "أكاديمية Mositto" },
+        "footer_copyright": { "fa": "© ۱۴۰۴ - تمامی حقوق برای آموزشگاه Mositto محفوظ است.", "en": "© 2025 - All rights reserved for Mositto Academy & Ideation.", "ar": "© 2025 - جميع الحقوق محفوظة لأكاديمية Mositto وتطوير الأفكار." },
+        "nav_home": { "fa": "خانه", "en": "Home", "ar": "الرئيسية" },
+        "nav_ai": { "fa": "هوش مصنوعی", "en": "Artificial Intelligence", "ar": "الذكاء الاصطناعي" },
+        "nav_robotics": { "fa": "رباتیک", "en": "Robotics", "ar": "الروبوتات" },
+        "nav_programming": { "fa": "برنامه‌نویسی", "en": "Programming", "ar": "البرمجة" },
+        "nav_about": { "fa": "درباره ما", "en": "About Us", "ar": "من نحن" },
+        "nav_contact": { "fa": "تماس با ما", "en": "Contact Us", "ar": "اتصل بنا" },
+        "hero_title_1": { "fa": "آینده را با", "en": "Build the future with", "ar": "ابنِ المستقبل بـ" },
+        "hero_title_2": { "fa": " بسازید", "en": "", "ar": "" },
+        "hero_subtitle": { "fa": "جامع‌ترین دوره‌های آموزشی هوش مصنوعی، رباتیک و برنامه‌نویسی برای متخصصان فردا", "en": "The most comprehensive AI, Robotics, and Programming courses for tomorrow's specialists", "ar": "الدورات الأكثر شمولاً في الذكاء الاصطناعي والروبوتات والبرمجة لمتخصصي الغد" },
+        "hero_button": { "fa": "مشاهده دوره‌ها", "en": "View Courses", "ar": "استعراض الدورات" },
         "typed_strings": {
             "fa": ['هوش مصنوعی', 'رباتیک', 'برنامه‌نویسی', 'آینده شغلی خود'],
             "en": ['Artificial Intelligence', 'Robotics', 'Programming', 'your career future'],
-            "fr": ["l'Intelligence Artificielle", 'la Robotique', 'la Programmation', 'votre avenir professionnel'],
             "ar": ['الذكاء الاصطناعي', 'الروبوتات', 'البرمجة', 'مستقبلك المهني']
         },
-        "why_us_title": { "fa": "چرا Mositto را انتخاب کنید؟", "en": "Why Choose Mositto?", "fr": "Pourquoi Choisir Mositto ?", "ar": "لماذا تختار Mositto؟" },
-        "why_us_1_title": { "fa": "اساتید متخصص", "en": "Expert Instructors", "fr": "Instructeurs Experts", "ar": "مدربون خبراء" },
-        "why_us_1_text": { "fa": "یادگیری از متخصصان با تجربه که مستقیماً در صنعت مشغول به کار هستند.", "en": "Learn from experienced professionals working directly in the industry.", "fr": "Apprenez auprès de professionnels expérimentés travaillant directement dans l'industrie.", "ar": "تعلم من محترفين ذوي خبرة يعملون مباشرة في هذا المجال." },
-        "why_us_2_title": { "fa": "پروژه‌های واقعی", "en": "Real-World Projects", "fr": "Projets Concrets", "ar": "مشاريع واقعية" },
-        "why_us_2_text": { "fa": "با ساختن پروژه‌های عملی و کاربردی، برای چالش‌های دنیای واقعی آماده شوید.", "en": "Prepare for real-world challenges by building practical, hands-on projects.", "fr": "Préparez-vous aux défis du monde réel en réalisant des projets pratiques et concrets.", "ar": "استعد لتحديات العالم الحقيقي من خلال بناء مشاريع عملية وتطبيقية." },
-        "why_us_3_title": { "fa": "پشتیبانی شغلی", "en": "Career Support", "fr": "Soutien de Carrière", "ar": "دعم مهني" },
-        "why_us_3_text": { "fa": "ما شما را در ساخت رزومه، آمادگی برای مصاحبه و ورود به بازار کار یاری می‌کنیم.", "en": "We assist you with resume building, interview preparation, and job market entry.", "fr": "Nous vous aidons à créer votre CV, à préparer les entretiens et à entrer sur le marché du travail.", "ar": "نساعدك في بناء السيرة الذاتية، التحضير للمقابلات، ودخول سوق العمل." },
-        "why_us_4_title": { "fa": "مدرک معتبر", "en": "Verified Certificate", "fr": "Certificat Vérifié", "ar": "شهادة معتمدة" },
-        "why_us_4_text": { "fa": "پس از اتمام هر دوره، گواهینامه معتبری دریافت کنید که مهارت شما را تایید می‌کند.", "en": "Receive a valid certificate upon completion to verify your skills.", "fr": "Recevez un certificat valide à la fin pour attester de vos compétences.", "ar": "احصل على شهادة معتمدة عند إتمام الدورة لإثبات مهاراتك." },
-        "learning_path_title": { "fa": "مسیر یادگیری شما", "en": "Your Learning Path", "fr": "Votre Parcours d'Apprentissage", "ar": "مسار التعلم الخاص بك" },
-        "learning_path_1_title": { "fa": "مفاهیم بنیادی", "en": "Fundamental Concepts", "fr": "Concepts Fondamentaux", "ar": "المفاهيم الأساسية" },
-        "learning_path_1_text": { "fa": "هر سفر با یک قدم آغاز می‌شود. ما با آموزش مفاهيم اصلی و تئوری‌های کليدی، يک پايه محکم برای شما می‌سازيم.", "en": "Every journey begins with a single step. We build a solid foundation by teaching core concepts and key theories.", "fr": "Chaque voyage commence par un premier pas. Nous construisons une base solide en enseignant les concepts de base et les théories clés.", "ar": "كل رحلة تبدأ بخطوة. نبني لك أساسًا متينًا من خلال تدريس المفاهيم الأساسية والنظريات الرئيسية." },
-        "learning_path_2_title": { "fa": "پروژه‌های عملی", "en": "Practical Projects", "fr": "Projets Pratiques", "ar": "مشاريع عملية" },
-        "learning_path_2_text": { "fa": "دانش خود را با کار روی پروژه‌های واقعی و چالش‌های صنعتی به کار بگیرید و مهارت‌های عملی کسب کنید.", "en": "Apply your knowledge by working on real projects and industry challenges to gain practical skills.", "fr": "Appliquez vos connaissances en travaillant sur des projets réels et des défis industriels pour acquérir des compétences pratiques.", "ar": "طبق معرفتك من خلال العمل على مشاريع حقيقية وتحديات صناعية لاكتساب مهارات عملية." },
-        "learning_path_3_title": { "fa": "آمادگی برای بازار کار", "en": "Career Readiness", "fr": "Préparation à la Carrière", "ar": "الاستعداد الوظيفي" },
-        "learning_path_3_text": { "fa": "با ساخت یک پورتفولیوی قوی و دریافت پشتیبانی شغلی، با اطمینان قدم در مسیر حرفه‌ای خود بگذارید.", "en": "Step confidently into your professional path by building a strong portfolio and receiving career support.", "fr": "Entrez avec confiance dans votre carrière en créant un portfolio solide et en bénéficiant d'un soutien professionnel.", "ar": "ادخل مسارك المهني بثقة من خلال بناء ملف أعمال قوي وتلقي الدعم الوظيفي." },
-        "tech_title": { "fa": "فناوری‌هایی که آموزش می‌دهیم", "en": "Technologies We Teach", "fr": "Technologies que nous enseignons", "ar": "التقنيات التي ندرسها" },
-        "testimonial_title": { "fa": "نظرات دانشجویان ما", "en": "What Our Students Say", "fr": "Ce que disent nos étudiants", "ar": "ماذا يقول طلابنا" },
-        "cta_title": { "fa": "آیا برای شروع سفر خود آماده‌اید؟", "en": "Ready to Start Your Journey?", "fr": "Prêt à commencer votre voyage ?", "ar": "هل أنت مستعد لبدء رحلتك؟" },
-        "cta_subtitle": { "fa": "به هزاران متخصصی بپیوندید که آینده خود را با Mositto ساخته‌اند. دوره‌های ما را بررسی کنید و اولین قدم را امروز بردارید.", "en": "Join thousands of professionals who have built their future with Mositto. Explore our courses and take the first step today.", "fr": "Rejoignez des milliers de professionnels qui ont construit leur avenir avec Mositto. Explorez nos cours et faites le premier pas dès aujourd'hui.", "ar": "انضم إلى آلاف المحترفين الذين بنوا مستقبلهم مع Mositto. استكشف دوراتنا واتخذ الخطوة الأولى اليوم." },
-        "cta_button": { "fa": "اکنون شروع کنید", "en": "Start Now", "fr": "Commencez maintenant", "ar": "ابدأ الآن" },
-        "filter_all": { "fa": "همه", "en": "All", "fr": "Tous", "ar": "الكل" },
-        "filter_beginner": { "fa": "مبتدی", "en": "Beginner", "fr": "Débutant", "ar": "مبتدئ" },
-        "filter_beginner_alt": { "fa": "مقدماتی", "en": "Basic", "fr": "Basique", "ar": "أساسي" },
-        "filter_intermediate": { "fa": "متوسط", "en": "Intermediate", "fr": "Intermédiaire", "ar": "متوسط" },
-        "filter_advanced": { "fa": "پیشرفته", "en": "Advanced", "fr": "Avancé", "ar": "متقدم" },
-        "filter_python": { "fa": "پایتون", "en": "Python", "fr": "Python", "ar": "بايثون" },
-        "filter_php": { "fa": "PHP و Laravel", "en": "PHP & Laravel", "fr": "PHP & Laravel", "ar": "PHP و Laravel" },
-        "filter_csharp": { "fa": "C# و ASP.NET", "en": "C# & ASP.NET", "fr": "C# & ASP.NET", "ar": "C# و ASP.NET" },
-        "filter_java": { "fa": "Java و Android", "en": "Java & Android", "fr": "Java & Android", "ar": "Java و Android" },
-        "filter_others": { "fa": "سایر زبان‌ها", "en": "Other Languages", "fr": "Autres Langages", "ar": "لغات أخرى" },
-        "filter_skills": { "fa": "مهارت‌های مکمل", "en": "Complementary Skills", "fr": "Compétences Complémentaires", "ar": "مهارات تكميلية" },
-        "ai_section_title": { "fa": "دوره‌های هوش مصنوعی", "en": "Artificial Intelligence Courses", "fr": "Cours d'Intelligence Artificielle", "ar": "دورات الذكاء الاصطناعي" },
-        "robotics_section_title": { "fa": "دوره‌های جامع رباتیک", "en": "Comprehensive Robotics Courses", "fr": "Cours Complets de Robotique", "ar": "دورات الروبوتات الشاملة" },
-        "programming_section_title": { "fa": "دوره‌های برنامه‌نویسی", "en": "Programming Courses", "fr": "Cours de Programmation", "ar": "دورات البرمجة" },
-        "about_section_title": { "fa": "درباره ما", "en": "About Us", "fr": "À propos de nous", "ar": "من نحن" },
-        "contact_section_title": { "fa": "تماس با ما", "en": "Contact Us", "fr": "Contactez-nous", "ar": "اتصل بنا" },
-        "about_subtitle": { "fa": "پیشگام در آموزش فناوری‌های نوین", "en": "Pioneering the Education of Modern Technologies", "fr": "Pionnier dans l'éducation aux technologies modernes", "ar": "رواد في تعليم التقنيات الحديثة" },
-        "about_text_1": { "fa": "آموزشگاه Mositto با هدف توانمندسازی نسل جدید متخصصان و علاقه‌مندان به فناوری‌های پیشرفته تأسیس شد. ما باور داریم که آینده توسط کسانی ساخته می‌شود که بر ابزارهای نوین مسلط هستند. به همین دلیل، جامع‌ترین و به‌روزترین دوره‌های آموزشی در حوزه‌های هوش مصنوعی، رباتیک و برنامه‌نویسی را با بهره‌گیری از اساتید مجرب و متدهای آموزشی مدرن ارائه می‌دهیم.", "en": "Mositto Academy was founded with the aim of empowering the new generation of specialists and enthusiasts of advanced technologies. We believe the future is built by those who master modern tools. Therefore, we offer the most comprehensive and up-to-date courses in AI, Robotics, and Programming, utilizing experienced instructors and modern teaching methods.", "fr": "L'Académie Mositto a été fondée dans le but de former la nouvelle génération de spécialistes et de passionnés de technologies de pointe. Nous croyons que l'avenir est construit par ceux qui maîtrisent les outils modernes. C'est pourquoi nous proposons les cours les plus complets et les plus à jour en IA, Robotique et Programmation, en faisant appel à des instructeurs expérimentés et à des méthodes d'enseignement modernes.", "ar": "تأسست أكاديمية Mositto بهدف تمكين الجيل الجديد من المتخصصين والمتحمسين للتقنيات المتقدمة. نؤمن بأن المستقبل يُبنى بأيدي أولئك الذين يتقنون الأدوات الحديثة. لذلك، نقدم الدورات الأكثر شمولاً وحداثة في مجالات الذكاء الاصطناعي والروبوتات والبرمجة، بالاعتماد على مدربين خبراء وأساليب تعليمية عصرية." },
-        "about_text_2": { "fa": "ماموریت ما، پر کردن شکاف بین دانش آکادمیک و نیازهای واقعی صنعت است. در Mositto، دانشجویان نه تنها مفاهیم تئوری را می‌آموزند، بلکه با انجام پروژه‌های عملی و واقعی، آماده ورود به بازار کار جهانی می‌شوند.", "en": "Our mission is to bridge the gap between academic knowledge and the real needs of the industry. At Mositto, students not only learn theoretical concepts but also get ready for the global job market by working on practical, real-world projects.", "fr": "Notre mission est de combler le fossé entre les connaissances académiques et les besoins réels de l'industrie. Chez Mositto, les étudiants apprennent non seulement les concepts théoriques, mais se préparent également au marché du travail mondial en réalisant des projets pratiques et réels.", "ar": "مهمتنا هي سد الفجوة بين المعرفة الأكاديمية والاحتياجات الحقيقية للصناعة. في Mositto، لا يتعلم الطلاب المفاهيم النظرية فحسب، بل يستعدون أيضًا لسوق العمل العالمي من خلال العمل على مشاريع عملية وواقعية." },
-        "about_feature_1_title": { "fa": "اساتید متخصص", "en": "Expert Instructors", "fr": "Instructeurs Experts", "ar": "مدربون خبراء" },
-        "about_feature_1_text": { "fa": "متخصصان با تجربه از قلب صنعت", "en": "Experienced professionals from the industry", "fr": "Professionnels expérimentés de l'industrie", "ar": "محترفون ذوو خبرة من قلب الصناعة" },
-        "about_feature_2_title": { "fa": "پروژه‌های واقعی", "en": "Real Projects", "fr": "Projets Réels", "ar": "مشاريع واقعية" },
-        "about_feature_2_text": { "fa": "کسب تجربه عملی برای بازار کار", "en": "Gain practical experience for the job market", "fr": "Acquérir une expérience pratique pour le marché du travail", "ar": "اكتساب خبرة عملية لسوق العمل" },
-        "about_feature_3_title": { "fa": "مدرک معتبر", "en": "Valid Certificate", "fr": "Certificat Valide", "ar": "شهادة معتمدة" },
-        "about_feature_3_text": { "fa": "ارائه گواهینامه پایان دوره", "en": "End-of-course certification provided", "fr": "Certification de fin de cours fournie", "ar": "تُمنح شهادة في نهاية الدورة" },
-        "about_feature_4_title": { "fa": "پشتیبانی دائمی", "en": "Ongoing Support", "fr": "Soutien Continu", "ar": "دعم مستمر" },
-        "about_feature_4_text": { "fa": "همراهی شما حتی پس از دوره", "en": "We support you even after the course", "fr": "Nous vous soutenons même après le cours", "ar": "ندعمك حتى بعد انتهاء الدورة" },
-        "contact_address_label": { "fa": "آدرس:", "en": "Address:", "fr": "Adresse :", "ar": "العنوان:" },
-        "contact_address_value": { "fa": "ایران، تهران، خیابان ایرانشهر، پارک هنرمندان", "en": "Iran, Tehran, Iranshahr St, Honarmandan Park", "fr": "Iran, Téhéran, Rue Iranshahr, Parc Honarmandan", "ar": "إيران، طهران، شارع إيرانشهر، حديقة هنرمندان" },
-        "contact_email_label": { "fa": "ایمیل:", "en": "Email:", "fr": "E-mail :", "ar": "البريد الإلكتروني:" },
-        "contact_phone_label": { "fa": "تلفن:", "en": "Phone:", "fr": "Téléphone :", "ar": "الهاتف:" },
-        "card_level_label": { "fa": "سطح", "en": "Level", "fr": "Niveau", "ar": "المستوى" },
-        "card_duration_label": { "fa": "زمان", "en": "Duration", "fr": "Durée", "ar": "المدة" },
-        "card_prereq_label": { "fa": "پیش‌نیاز", "en": "Prerequisite", "fr": "Prérequis", "ar": "متطلب سابق" },
-        "card_details_button": { "fa": "مشاهده جزئیات", "en": "View Details", "fr": "Voir les détails", "ar": "عرض التفاصيل" },
-        "modal_syllabus_label": { "fa": "سرفصل‌ها:", "en": "Syllabus:", "fr": "Programme :", "ar": "المحتوى:" },
-        "modal_level_label": { "fa": "سطح دوره:", "en": "Course Level:", "fr": "Niveau du cours :", "ar": "مستوى الدورة:" },
-        "modal_prereq_label": { "fa": "پیش‌نیاز:", "en": "Prerequisite:", "fr": "Prérequis :", "ar": "متطلب سابق:" },
-        "modal_duration_label": { "fa": "مدت زمان:", "en": "Duration:", "fr": "Durée :", "ar": "المدة الزمنية:" },
-        "modal_project_label": { "fa": "پروژه عملی:", "en": "Practical Project:", "fr": "Projet Pratique :", "ar": "مشروع عملي:" },
-        "modal_close_button": { "fa": "بستن", "en": "Close", "fr": "Fermer", "ar": "إغلاق" },
-        "founder_section_title": { "fa": "بنیان‌گذار Mositto", "en": "Founder of Mositto", "fr": "Fondateur de Mositto", "ar": "مؤسس Mositto" },
-        "founder_name": { "fa": "محسن توکلی", "en": "Mohsen Tavakoli", "fr": "Mohsen Tavakoli", "ar": "محسن توكلي" },
-        "founder_title": { "fa": "مدیرعامل و بنیان‌گذار", "en": "CEO & Founder", "fr": "PDG & Fondateur", "ar": "الرئيس التنفيذي والمؤسس" },
-        "founder_bio": { "fa": "چشم‌انداز ما در Mositto، ایجاد مسیری روشن برای علاقه‌مندان به فناوری است تا با کسب مهارت‌های عملی و به‌روز، به پیشگامان صنعت فردا تبدیل شوند.", "en": "Our vision at Mositto is to create a clear path for technology enthusiasts to become the pioneers of tomorrow's industry by acquiring practical and up-to-date skills.", "fr": "Notre vision chez Mositto est de créer un chemin clair pour les passionnés de technologie afin qu'ils deviennent les pionniers de l'industrie de demain en acquérant des compétences pratiques et à jour.", "ar": "رؤيتنا في Mositto هي خلق مسار واضح لعشاق التكنولوجيا ليصبحوا رواد صناعة الغد من خلال اكتساب مهارات عملية ومحدثة." },
-        "founder_button": { "fa": "مشاهده رزومه", "en": "View Resume", "fr": "Voir le CV", "ar": "عرض السيرة الذاتية" },
-        "founder_modal_title": { "fa": "رزومه محسن توکلی", "en": "Resume of Mohsen Tavakoli", "fr": "CV de Mohsen Tavakoli", "ar": "السيرة الذاتية لمحسن توكلي" },
-        "branches_section_title": { "fa": "شعب ما", "en": "Our Branches", "fr": "Nos Succursales", "ar": "فروعنا" },
-        "branches_subtitle": { "fa": "ما همیشه در نزدیکی شما هستیم. برای ارائه بهترین تجربه آموزشی، شعب Mositto در مکان‌های زیر آماده خدمت‌رسانی به شما عزیزان هستند.", "en": "We are always near you. To provide the best educational experience, Mositto branches are ready to serve you at the following locations.", "fr": "Nous sommes toujours près de chez vous. Pour offrir la meilleure expérience éducative, les succursales de Mositto sont prêtes à vous servir aux endroits suivants.", "ar": "نحن دائمًا بالقرب منك. لتقديم أفضل تجربة تعليمية، فروع Mositto جاهزة لخدمتكم في المواقع التالية." },
-        "branch1_name": { "fa": "باغ کتاب تهران", "en": "Tehran Book Garden", "fr": "Jardin du Livre de Téhéran", "ar": "حديقة كتاب طهران" },
-        "branch1_address": { "fa": "باغ کتاب تهران – باشگاه رباتیک موسیتو", "en": "Tehran Book Garden – Mositto Robotics Club", "fr": "Jardin du Livre de Téhéran – Club Robotique Mositto", "ar": "حديقة كتاب طهران – نادي موسيتو للروبوتات" },
-        "branch2_name": { "fa": "ایرانشهر", "en": "Iranshahr", "fr": "Iranshahr", "ar": "إيرانشهر" },
-        "branch2_address": { "fa": "خیابان ایرانشهر – پارک هنرمندان – ضلع شمالی پارک", "en": "Iranshahr St – Honarmandan Park – North side", "fr": "Rue Iranshahr – Parc Honarmandan – Côté Nord", "ar": "شارع إيرانشهر – حديقة هنرمندان – الجانب الشمالي" },
-        "branch3_name": { "fa": "قلهک", "en": "Gholhak", "fr": "Gholhak", "ar": "قلهك" },
-        "branch3_address": { "fa": "قلهک، خیابان یخچال، پردیس قلهک، مدرسه مکاترونیک موسیتو", "en": "Gholhak, Yakhchal St, Gholhak Campus, Mositto Mechatronics School", "fr": "Gholhak, Rue Yakhchal, Campus Gholhak, École de Mécatronique Mositto", "ar": "قلهك، شارع يخچال، مجمع قلهك، مدرسة موسيتو للميكاترونكس" },
-        "branch4_name": { "fa": "ونکوور، کانادا", "en": "Vancouver, Canada", "fr": "Vancouver, Canada", "ar": "فانكوفر، كندا" },
-        "branch4_address": { "fa": "403, 2030 Marine Dr, North Vancouver, BC", "en": "403, 2030 Marine Dr, North Vancouver, BC", "fr": "403, 2030 Marine Dr, North Vancouver, BC", "ar": "403، 2030 Marine Dr، شمال فانكوفر، BC" }
+        "why_us_title": { "fa": "چرا Mositto را انتخاب کنید؟", "en": "Why Choose Mositto?", "ar": "لماذا تختار Mositto؟" },
+        "why_us_1_title": { "fa": "اساتید متخصص", "en": "Expert Instructors", "ar": "مدربون خبراء" },
+        "why_us_1_text": { "fa": "یادگیری از متخصصان با تجربه که مستقیماً در صنعت مشغول به کار هستند.", "en": "Learn from experienced professionals working directly in the industry.", "ar": "تعلم من محترفين ذوي خبرة يعملون مباشرة في هذا المجال." },
+        "why_us_2_title": { "fa": "پروژه‌های واقعی", "en": "Real-World Projects", "ar": "مشاريع واقعية" },
+        "why_us_2_text": { "fa": "با ساختن پروژه‌های عملی و کاربردی، برای چالش‌های دنیای واقعی آماده شوید.", "en": "Prepare for real-world challenges by building practical, hands-on projects.", "ar": "استعد لتحديات العالم الحقيقي من خلال بناء مشاريع عملية وتطبيقية." },
+        "why_us_3_title": { "fa": "پشتیبانی شغلی", "en": "Career Support", "ar": "دعم مهني" },
+        "why_us_3_text": { "fa": "ما شما را در ساخت رزومه، آمادگی برای مصاحبه و ورود به بازار کار یاری می‌کنیم.", "en": "We assist you with resume building, interview preparation, and job market entry.", "ar": "نساعدك في بناء السيرة الذاتية، التحضير للمقابلات، ودخول سوق العمل." },
+        "why_us_4_title": { "fa": "مدرک معتبر", "en": "Verified Certificate", "ar": "شهادة معتمدة" },
+        "why_us_4_text": { "fa": "پس از اتمام هر دوره، گواهینامه معتبری دریافت کنید که مهارت شما را تایید می‌کند.", "en": "Receive a valid certificate upon completion to verify your skills.", "ar": "احصل على شهادة معتمدة عند إتمام الدورة لإثبات مهاراتك." },
+        "tech_title": { "fa": "فناوری‌هایی که آموزش می‌دهیم", "en": "Technologies We Teach", "ar": "التقنيات التي ندرسها" },
+        "testimonial_title": { "fa": "نظرات دانشجویان ما", "en": "What Our Students Say", "ar": "ماذا يقول طلابنا" },
+        "filter_all": { "fa": "همه", "en": "All", "ar": "الكل" },
+        "filter_beginner": { "fa": "مبتدی", "en": "Beginner", "ar": "مبتدئ" },
+        "filter_beginner_alt": { "fa": "مقدماتی", "en": "Basic", "ar": "أساسي" },
+        "filter_intermediate": { "fa": "متوسط", "en": "Intermediate", "ar": "متوسط" },
+        "filter_advanced": { "fa": "پیشرفته", "en": "Advanced", "ar": "متقدم" },
+        "filter_python": { "fa": "پایتون", "en": "Python", "ar": "بايثون" },
+        "filter_php": { "fa": "PHP و Laravel", "en": "PHP & Laravel", "ar": "PHP و Laravel" },
+        "filter_csharp": { "fa": "C# و .NET", "en": "C# & .NET", "ar": "C# و .NET" },
+        "filter_java": { "fa": "Java و Android", "en": "Java & Android", "ar": "Java و Android" },
+        "filter_skills": { "fa": "مهارت‌های مکمل", "en": "Complementary Skills", "ar": "مهارات تكميلية" },
+        "ai_section_title": { "fa": "دوره‌های هوش مصنوعی", "en": "Artificial Intelligence Courses", "ar": "دورات الذكاء الاصطناعي" },
+        "robotics_section_title": { "fa": "دوره‌های جامع رباتیک", "en": "Comprehensive Robotics Courses", "ar": "دورات الروبوتات الشاملة" },
+        "programming_section_title": { "fa": "دوره‌های برنامه‌نویسی", "en": "Programming Courses", "ar": "دورات البرمجة" },
+        "contact_section_title": { "fa": "تماس با ما", "en": "Contact Us", "ar": "اتصل بنا" },
+        "contact_address_label": { "fa": "آدرس:", "en": "Address:", "ar": "العنوان:" },
+        "contact_address_value": { "fa": "ایران، تهران، پارک علم و فناوری", "en": "Iran, Tehran, Science and Technology Park", "ar": "إيران، طهران، مجمع العلوم والتكنولوجيا" },
+        "contact_email_label": { "fa": "ایمیل:", "en": "Email:", "ar": "البريد الإلكتروني:" },
+        "contact_phone_label": { "fa": "تلفن:", "en": "Phone:", "ar": "الهاتف:" },
+        "card_level_label": { "fa": "سطح", "en": "Level", "ar": "المستوى" },
+        "card_duration_label": { "fa": "زمان", "en": "Duration", "ar": "المدة" },
+        "card_prereq_label": { "fa": "پیش‌نیاز", "en": "Prerequisite", "ar": "متطلب سابق" },
+        "card_details_button": { "fa": "مشاهده جزئیات", "en": "View Details", "ar": "عرض التفاصيل" },
+        "modal_syllabus_label": { "fa": "سرفصل‌ها:", "en": "Syllabus:", "ar": "المحتوى:" },
+        "modal_level_label": { "fa": "سطح دوره:", "en": "Course Level:", "ar": "مستوى الدورة:" },
+        "modal_prereq_label": { "fa": "پیش‌نیاز:", "en": "Prerequisite:", "ar": "متطلب سابق:" },
+        "modal_duration_label": { "fa": "مدت زمان:", "en": "Duration:", "ar": "المدة الزمنية:" },
+        "modal_project_label": { "fa": "پروژه عملی:", "en": "Practical Project:", "ar": "مشروع عملي:" },
     };
     const testimonialsData = [
-        { name: "فاطمه احمدی", course: {fa: "دوره جامع یادگیری عمیق", en: "Deep Learning Full Course", fr: "Cours Complet de Deep Learning", ar: "دورة التعلم العميق الشاملة"}, text: {fa: "محتوای دوره و پشتیبانی اساتید فوق‌العاده بود. پروژه‌های عملی واقعاً به من کمک کرد تا مفاهیم را درک کنم.", en: "The course content and instructor support were outstanding. The practical projects really helped me grasp the concepts.", fr: "Le contenu du cours et le soutien des instructeurs étaient exceptionnels. Les projets pratiques m'ont vraiment aidé à comprendre les concepts.", ar: "كان محتوى الدورة ودعم المدربين رائعًا. ساعدتني المشاريع العملية حقًا على فهم المفاهيم."}, img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" },
-        { name: "علی محمدی", course: {fa: "مسیر رباتیک با آردوینو", en: "Arduino Robotics Path", fr: "Parcours Robotique Arduino", ar: "مسار الروبوتات بالأردوينو"}, text: {fa: "بهترین بخش دوره، ساخت ربات از صفر بود. تجربه‌ای بی‌نظیر که اعتماد به نفس من را به شدت بالا برد.", en: "The best part was building a robot from scratch. An amazing experience that boosted my confidence immensely.", fr: "La meilleure partie était de construire un robot à partir de zéro. Une expérience incroyable qui a énormément renforcé ma confiance.", ar: "كان أفضل جزء هو بناء روبوت من الصفر. تجربة مدهشة عززت ثقتي بشكل كبير."}, img: "https://images.unsplash.com/photo-1552058544-f2b08422138a?q=80&w=200&auto=format&fit=crop" },
-        { name: "مریم حسینی", course: {fa: "برنامه‌نویسی پیشرفته پایتون", en: "Advanced Python Programming", fr: "Programmation Python Avancée", ar: "برمجة بايثون المتقدمة"}, text: {fa: "این دوره دانش برنامه‌نویسی من را به سطح جدیدی رساند. حالا می‌توانم کدهای بهینه‌تر و حرفه‌ای‌تری بنویسم.", en: "This course took my programming skills to a new level. I can now write more efficient and professional code.", fr: "Ce cours a fait passer mes compétences en programmation à un niveau supérieur. Je peux maintenant écrire du code plus efficace et professionnel.", ar: "هذه الدورة نقلت مهاراتي في البرمجة إلى مستوى جديد. يمكنني الآن كتابة أكواد أكثر كفاءة واحترافية."}, img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop" }
+        { name: "Fatemeh Ahmadi", course: {fa: "دوره جامع یادگیری عمیق", en: "Deep Learning Full Course", ar: "دورة التعلم العميق الشاملة"}, text: {fa: "محتوای دوره و پشتیبانی اساتید فوق‌العاده بود. پروژه‌های عملی واقعاً به من کمک کرد تا مفاهیم را درک کنم.", en: "The course content and instructor support were outstanding. The practical projects really helped me grasp the concepts.", ar: "كان محتوى الدورة ودعم المدربين رائعًا. ساعدتني المشاريع العملية حقًا على فهم المفاهيم."}, img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" },
+        { name: "Ali Mohammadi", course: {fa: "مسیر رباتیک با آردوینو", en: "Arduino Robotics Path", ar: "مسار الروبوتات بالأردوينو"}, text: {fa: "بهترین بخش دوره، ساخت ربات از صفر بود. تجربه‌ای بی‌نظیر که اعتماد به نفس من را به شدت بالا برد.", en: "The best part was building a robot from scratch. An amazing experience that boosted my confidence immensely.", ar: "كان أفضل جزء هو بناء روبوت من الصفر. تجربة مدهشة عززت ثقتي بشكل كبير."}, img: "https://images.unsplash.com/photo-1552058544-f2b08422138a?q=80&w=200&auto=format&fit=crop" },
+        { name: "Maryam Hosseini", course: {fa: "برنامه‌نویسی پیشرفته پایتون", en: "Advanced Python Programming", ar: "برمجة بايثون المتقدمة"}, text: {fa: "این دوره دانش برنامه‌نویسی من را به سطح جدیدی رساند. حالا می‌توانم کدهای بهینه‌تر و حرفه‌ای‌تری بنویسم.", en: "This course took my programming skills to a new level. I can now write more efficient and professional code.", ar: "هذه الدورة نقلت مهاراتي في البرمجة إلى مستوى جديد. يمكنني الآن كتابة أكواد أكثر كفاءة واحترافية."}, img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=200&auto=format&fit=crop" }
     ];
+    // --- SAMPLPE COURSE DATA ---
     const fullAiCourseData = [
-        {id:1,level:'beginner',category:'beginner',title:{fa:'مفاهیم و مبانی هوش مصنوعی',en:'AI Concepts & Fundamentals',fr:'Concepts et Fondamentaux de l\'IA', ar:'مفاهيم وأساسيات الذكاء الاصطناعي'},duration:{fa:'۳۰ ساعت',en:'30 Hours',fr:'30 Heures', ar:'30 ساعة'},prerequisites:{fa:'ندارد',en:'None',fr:'Aucun', ar:'لا يوجد'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>تاریخچه AI</li><li>شاخه‌های AI</li><li>کاربردها</li><li>ابزارها (Python, Jupyter)</li></ul>',en:'<ul><li>History of AI</li><li>Branches of AI</li><li>Applications</li><li>Tools (Python, Jupyter)</li></ul>',fr:'<ul><li>Histoire de l\'IA</li><li>Branches de l\'IA</li><li>Applications</li><li>Outils (Python, Jupyter)</li></ul>', ar:'<ul><li>تاريخ الذكاء الاصطناعي</li><li>فروع الذكاء الاصطناعي</li><li>التطبيقات</li><li>الأدوات (Python, Jupyter)</li></ul>'}},
-        {id:2,level:'intermediate',category:'intermediate',title:{fa:'یادگیری ماشین (Machine Learning)',en:'Machine Learning',fr:'Apprentissage Automatique', ar:'تعلم الآلة'},duration:{fa:'۵۰ ساعت',en:'50 Hours',fr:'50 Heures', ar:'50 ساعة'},prerequisites:{fa:'مفاهیم و مبانی هوش مصنوعی',en:'AI Concepts & Fundamentals',fr:'Concepts et Fondamentaux de l\'IA', ar:'مفاهيم وأساسيات الذكاء الاصطناعي'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>انواع یادگیری</li><li>مدل‌های پایه</li><li>ارزیابی مدل</li><li>Scikit-Learn</li></ul>',en:'<ul><li>Types of Learning</li><li>Basic Models</li><li>Model Evaluation</li><li>Scikit-Learn</li></ul>',fr:'<ul><li>Types d\'apprentissage</li><li>Modèles de base</li><li>Évaluation de modèle</li><li>Scikit-Learn</li></ul>', ar:'<ul><li>أنواع التعلم</li><li>النماذج الأساسية</li><li>تقييم النماذج</li><li>مكتبة Scikit-Learn</li></ul>'}},
-        {id:3,level:'intermediate',category:'intermediate',title:{fa:'یادگیری عمیق (Deep Learning)',en:'Deep Learning',fr:'Apprentissage Profond', ar:'التعلم العميق'},duration:{fa:'۷۰ ساعت',en:'70 Hours',fr:'70 Heures', ar:'70 ساعة'},prerequisites:{fa:'یادگیری ماشین',en:'Machine Learning',fr:'Apprentissage Automatique', ar:'تعلم الآلة'},project:{fa:'طبقه‌بندی تصاویر',en:'Image Classification',fr:'Classification d\'images', ar:'تصنيف الصور'},syllabus:{fa:'<ul><li>شبکه‌های عصبی</li><li>Backpropagation</li><li>معماری‌ها (CNN, RNN)</li><li>TensorFlow/PyTorch</li></ul>',en:'<ul><li>Neural Networks</li><li>Backpropagation</li><li>Architectures (CNN, RNN)</li><li>TensorFlow/PyTorch</li></ul>',fr:'<ul><li>Réseaux de neurones</li><li>Rétropropagation</li><li>Architectures (CNN, RNN)</li><li>TensorFlow/PyTorch</li></ul>', ar:'<ul><li>الشبكات العصبية</li><li>الانتشار الخلفي</li><li>البنى (CNN, RNN)</li><li>TensorFlow/PyTorch</li></ul>'}},
-        {id:4,level:'intermediate-advanced',category:'advanced',title:{fa:'بینایی ماشین (Computer Vision)',en:'Computer Vision',fr:'Vision par Ordinateur', ar:'الرؤية الحاسوبية'},duration:{fa:'۳۰ ساعت',en:'30 Hours',fr:'30 Heures', ar:'30 ساعة'},prerequisites:{fa:'یادگیری عمیق',en:'Deep Learning',fr:'Apprentissage Profond', ar:'التعلم العميق'},project:{fa:'تشخیص چهره و پلاک',en:'Face & Plate Recognition',fr:'Reconnaissance faciale et de plaque', ar:'التعرف على الوجوه ولوحات السيارات'},syllabus:{fa:'<ul><li>پردازش تصویر</li><li>تشخیص اشیاء</li><li>OpenCV, YOLO</li></ul>',en:'<ul><li>Image Processing</li><li>Object Detection</li><li>OpenCV, YOLO</li></ul>',fr:'<ul><li>Traitement d\'images</li><li>Détection d\'objets</li><li>OpenCV, YOLO</li></ul>', ar:'<ul><li>معالجة الصور</li><li>اكتشاف الأجسام</li><li>OpenCV, YOLO</li></ul>'}},
-        {id:5,level:'intermediate-advanced',category:'advanced',title:{fa:'هوش مصنوعی لبه‌ای (Edge AI)',en:'Edge AI',fr:'IA en Périphérie (Edge AI)', ar:'الذكاء الاصطناعي على الحافة'},duration:{fa:'مشخص نشده',en:'TBD',fr:'À déterminer', ar:'يُحدد لاحقًا'},prerequisites:{fa:'یادگیری عمیق',en:'Deep Learning',fr:'Apprentissage Profond', ar:'التعلم العميق'},project:{fa:'مدل روی موبایل',en:'Model on Mobile',fr:'Modèle sur mobile', ar:'نموذج على الهاتف المحمول'},syllabus:{fa:'<ul><li>مقدمه</li><li>استقرار مدل</li><li>TensorFlow Lite</li><li>بهینه‌سازی</li></ul>',en:'<ul><li>Introduction</li><li>Model Deployment</li><li>TensorFlow Lite</li><li>Optimization</li></ul>',fr:'<ul><li>Introduction</li><li>Déploiement de modèle</li><li>TensorFlow Lite</li><li>Optimisation</li></ul>', ar:'<ul><li>مقدمة</li><li>نشر النماذج</li><li>TensorFlow Lite</li><li>التحسين</li></ul>'}},
-        {id:6,level:'intermediate-advanced',category:'advanced',title:{fa:'یادگیری تقویتی',en:'Reinforcement Learning',fr:'Apprentissage par Renforcement', ar:'التعلم المعزز'},duration:{fa:'۲۰ ساعت',en:'20 Hours',fr:'20 Heures', ar:'20 ساعة'},prerequisites:{fa:'یادگیری ماشین و یادگیری عمیق',en:'Machine Learning & Deep Learning',fr:'Apprentissage Automatique & Apprentissage Profond', ar:'تعلم الآلة والتعلم العميق'},project:{fa:'طراحی Bot بازی',en:'Game Bot Design',fr:'Conception de bot de jeu', ar:'تصميم بوت للألعاب'},syllabus:{fa:'<ul><li>مبانی RL</li><li>الگوریتم‌های پایه (Q-Learning)</li><li>الگوریتم‌های پیشرفته (DQN)</li><li>OpenAI Gym</li></ul>',en:'<ul><li>RL Basics</li><li>Basic Algorithms (Q-Learning)</li><li>Advanced Algorithms (DQN)</li><li>OpenAI Gym</li></ul>',fr:'<ul><li>Bases du RL</li><li>Algorithmes de base (Q-Learning)</li><li>Algorithmes avancés (DQN)</li><li>OpenAI Gym</li></ul>', ar:'<ul><li>أساسيات التعلم المعزز</li><li>الخوارزميات الأساسية (Q-Learning)</li><li>الخوارزميات المتقدمة (DQN)</li><li>OpenAI Gym</li></ul>'}},
-        {id:7,level:'intermediate',category:'intermediate',title:{fa:'الگوریتم‌نویسی ML با Numpy',en:'ML Algorithms with Numpy',fr:'Algorithmes de ML avec Numpy', ar:'خوارزميات تعلم الآلة باستخدام Numpy'},duration:{fa:'۷۰ ساعت',en:'70 Hours',fr:'70 Heures', ar:'70 ساعة'},prerequisites:{fa:'ریاضیات برای AI و مبانی AI',en:'Mathematics for AI & AI Concepts',fr:'Mathématiques pour l\'IA & Concepts IA', ar:'الرياضيات للذكاء الاصطناعي ومفاهيم الذكاء الاصطناعي'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>پیاده‌سازی رگرسیون</li><li>K-Means از صفر</li><li>PCA با Numpy</li></ul>',en:'<ul><li>Implementing Regression</li><li>K-Means from scratch</li><li>PCA with Numpy</li></ul>',fr:'<ul><li>Implémentation de la régression</li><li>K-Means de zéro</li><li>PCA avec Numpy</li></ul>', ar:'<ul><li>تنفيذ الانحدار الخطي</li><li>K-Means من الصفر</li><li>تحليل المكونات الرئيسية (PCA) مع Numpy</li></ul>'}},
-        {id:8,level:'beginner-intermediate',category:'beginner',title:{fa:'ریاضیات برای AI',en:'Mathematics for AI',fr:'Mathématiques pour l\'IA', ar:'الرياضيات للذكاء الاصطناعي'},duration:{fa:'۷۰ ساعت',en:'70 Hours',fr:'70 Heures', ar:'70 ساعة'},prerequisites:{fa:'ندارد',en:'None',fr:'Aucun', ar:'لا يوجد'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>جبر خطی</li><li>حسابان</li><li>آمار و احتمال</li><li>بهینه‌سازی</li></ul>',en:'<ul><li>Linear Algebra</li><li>Calculus</li><li>Statistics & Probability</li><li>Optimization</li></ul>',fr:'<ul><li>Algèbre linéaire</li><li>Calcul</li><li>Statistiques et probabilités</li><li>Optimisation</li></ul>', ar:'<ul><li>الجبر الخطي</li><li>حساب التفاضل والتكامل</li><li>الإحصاء والاحتمالات</li><li>التحسين</li></ul>'}},
-        {id:9,level:'advanced',category:'advanced',title:{fa:'ساخت AI Agentها',en:'Building AI Agents',fr:'Création d\'Agents IA', ar:'بناء وكلاء الذكاء الاصطناعي'},duration:{fa:'۳۰ ساعت',en:'30 Hours',fr:'30 Heures', ar:'30 ساعة'},prerequisites:{fa:'یادگیری عمیق، یادگیری تقویتی، ریاضیات برای AI',en:'Deep Learning, Reinforcement Learning, Math for AI',fr:'Apprentissage Profond, Apprentissage par Renforcement, Maths pour l\'IA', ar:'التعلم العميق، التعلم المعزز، الرياضيات للذكاء الاصطناعي'},project:{fa:'چت‌بات هوشمند',en:'Intelligent Chatbot',fr:'Chatbot Intelligent', ar:'روبوت محادثة ذكي'},syllabus:{fa:'<ul><li>معماری Agent</li><li>Fine-Tuning LLMs</li><li>Prompt Engineering, RAG</li><li>LangChain</li></ul>',en:'<ul><li>Agent Architecture</li><li>Fine-Tuning LLMs</li><li>Prompt Engineering, RAG</li><li>LangChain</li></ul>',fr:'<ul><li>Architecture d\'agent</li><li>Fine-Tuning des LLMs</li><li>Prompt Engineering, RAG</li><li>LangChain</li></ul>', ar:'<ul><li>بنية الوكيل</li><li>ضبط النماذج اللغوية الكبيرة</li><li>هندسة الأوامر (Prompt Engineering), RAG</li><li>LangChain</li></ul>'}},
-        {id:10,level:'intermediate',category:'intermediate',title:{fa:'پیش‌بینی فروش با AI',en:'Sales Forecasting with AI',fr:'Prévision desVentes avec l\'IA', ar:'التنبؤ بالمبيعات باستخدام الذكاء الاصطناعي'},duration:{fa:'۲۰ ساعت',en:'20 Hours',fr:'20 Heures', ar:'20 ساعة'},prerequisites:{fa:'یادگیری ماشین، یادگیری عمیق، ریاضیات برای AI',en:'Machine Learning, Deep Learning, Math for AI',fr:'Apprentissage Automatique, Apprentissage Profond, Maths pour l\'IA', ar:'تعلم الآلة، التعلم العميق، الرياضيات للذكاء الاصطناعي'},project:{fa:'پیش‌بینی فروش فروشگاه',en:'Store Sales Forecast',fr:'Prévision des ventes d\'un magasin', ar:'التنبؤ بمبيعات متجر'},syllabus:{fa:'<ul><li>سری‌های زمانی</li><li>LSTM, ARIMA</li><li>داده‌های خارجی</li></ul>',en:'<ul><li>Time Series</li><li>LSTM, ARIMA</li><li>External Data</li></ul>',fr:'<ul><li>Séries temporelles</li><li>LSTM, ARIMA</li><li>Données externes</li></ul>', ar:'<ul><li>السلاسل الزمنية</li><li>LSTM, ARIMA</li><li>البيانات الخارجية</li></ul>'}},
-        {id:11,level:'beginner-intermediate',category:'beginner',title:{fa:'مدیریت محصول هوش مصنوعی',en:'AI Product Management',fr:'Gestion de Produit IA', ar:'إدارة منتجات الذكاء الاصطناعي'},duration:{fa:'۳۰ ساعت',en:'30 Hours',fr:'30 Heures', ar:'30 ساعة'},prerequisites:{fa:'مفاهیم و مبانی هوش مصنوعی',en:'AI Concepts & Fundamentals',fr:'Concepts et Fondamentaux de l\'IA', ar:'مفاهيم وأساسيات الذكاء الاصطناعي'},project:{fa:'طراحی بیزینس پلن',en:'Business Plan Design',fr:'Conception de business plan', ar:'تصميم خطة عمل'},syllabus:{fa:'<ul><li>چرخه عمر محصول AI</li><li>MVP و POC</li><li>اخلاق در AI</li></ul>',en:'<ul><li>AI Product Lifecycle</li><li>MVP & POC</li><li>AI Ethics</li></ul>',fr:'<ul><li>Cycle de vie du produit IA</li><li>MVP & POC</li><li>Éthique de l\'IA</li></ul>', ar:'<ul><li>دورة حياة منتج الذكاء الاصطناعي</li><li>المنتج الأولي القابل للتطبيق (MVP) وإثبات المفهوم (POC)</li><li>أخلاقيات الذكاء الاصطناعي</li></ul>'}},
-        {id:12,level:'intermediate',category:'intermediate',title:{fa:'تحلیل داده و داستان‌سرایی',en:'Data Analysis & Storytelling',fr:'Analyse de Données et Storytelling', ar:'تحليل البيانات وسرد القصص'},duration:{fa:'۱۷ ساعت',en:'17 Hours',fr:'17 Heures', ar:'17 ساعة'},prerequisites:{fa:'یادگیری ماشین',en:'Machine Learning',fr:'Apprentissage Automatique', ar:'تعلم الآلة'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>پاک‌سازی داده</li><li>مصورسازی (Plotly)</li><li>داشبورد (Tableau)</li></ul>',en:'<ul><li>Data Cleaning</li><li>Visualization (Plotly)</li><li>Dashboards (Tableau)</li></ul>',fr:'<ul><li>Nettoyage de données</li><li>Visualisation (Plotly)</li><li>Tableaux de bord (Tableau)</li></ul>', ar:'<ul><li>تنظيف البيانات</li><li>التصور البياني (Plotly)</li><li>لوحات المعلومات (Tableau)</li></ul>'}},
-        {id:13,level:'advanced',category:'advanced',title:{fa:'تحلیل متن پیشرفته (NLP)',en:'Advanced NLP',fr:'NLP Avancé', ar:'معالجة اللغات الطبيعية المتقدمة'},duration:{fa:'۲۵ ساعت',en:'25 Hours',fr:'25 Heures', ar:'25 ساعة'},prerequisites:{fa:'یادگیری عمیق و ریاضیات برای AI',en:'Deep Learning & Math for AI',fr:'Apprentissage Profond & Maths pour l\'IA', ar:'التعلم العميق والرياضيات للذكاء الاصطناعي'},project:{fa:'ساخت Chatbot متنی',en:'Building a Text Chatbot',fr:'Création d\'un Chatbot texte', ar:'بناء روبوت محادثة نصي'},syllabus:{fa:'<ul><li>پیش‌پردازش متن</li><li>Word Embeddings</li><li>Transformers (BERT, GPT)</li></ul>',en:'<ul><li>Text Preprocessing</li><li>Word Embeddings</li><li>Transformers (BERT, GPT)</li></ul>',fr:'<ul><li>Prétraitement de texte</li><li>Plongements de mots</li><li>Transformateurs (BERT, GPT)</li></ul>', ar:'<ul><li>المعالجة المسبقة للنصوص</li><li>تضمين الكلمات (Word Embeddings)</li><li>المحولات (BERT, GPT)</li></ul>'}},
-        {id:14,level:'advanced',category:'advanced',title:{fa:'ترید در بازارهای مالی با AI',en:'Algorithmic Trading with AI',fr:'Trading Algorithmique avec l\'IA', ar:'التداول الخوارزمي بالذكاء الاصطناعي'},duration:{fa:'مشخص نشده',en:'TBD',fr:'À déterminer', ar:'يُحدد لاحقًا'},prerequisites:{fa:'یادگیری تقویتی، پیش‌بینی فروش، ریاضیات برای AI',en:'Reinforcement Learning, Sales Forecasting, Math for AI',fr:'Apprentissage par Renforcement, Prévision des Ventes, Maths pour l\'IA', ar:'التعلم المعزز، التنبؤ بالمبيعات، الرياضيات للذكاء الاصطناعي'},project:{fa:'Bot ترید آزمایشی',en:'Test Trading Bot',fr:'Bot de trading de test', ar:'بوت تداول تجريبي'},syllabus:{fa:'<ul><li>داده‌های مالی</li><li>RL در معاملات</li><li>مدیریت ریسک</li></ul>',en:'<ul><li>Financial Data</li><li>RL in Trading</li><li>Risk Management</li></ul>',fr:'<ul><li>Données financières</li><li>RL en trading</li><li>Gestion des risques</li></ul>', ar:'<ul><li>البيانات المالية</li><li>التعلم المعزز في التداول</li><li>إدارة المخاطر</li></ul>'}},
-        {id:15,level:'intermediate',category:'intermediate',title:{fa:'سیستم‌های پیشنهادگر',en:'Recommender Systems',fr:'Systèmes de Recommandation', ar:'أنظمة التوصية'},duration:{fa:'۲۲ ساعت',en:'22 Hours',fr:'22 Heures', ar:'22 ساعة'},prerequisites:{fa:'یادگیری ماشین و یادگیری عمیق',en:'Machine Learning & Deep Learning',fr:'Apprentissage Automatique & Apprentissage Profond', ar:'تعلم الآلة والتعلم العميق'},project:{fa:'سیستم پیشنهاد فیلم',en:'Movie Recommender System',fr:'Système de recommandation de films', ar:'نظام توصية أفلام'},syllabus:{fa:'<ul><li>Collaborative Filtering</li><li>Matrix Factorization</li><li>Deep Learning for RecSys</li></ul>',en:'<ul><li>Collaborative Filtering</li><li>Matrix Factorization</li><li>Deep Learning for RecSys</li></ul>',fr:'<ul><li>Filtrage collaboratif</li><li>Factorisation de matrice</li><li>Deep Learning pour RecSys</li></ul>', ar:'<ul><li>الترشيح التعاوني</li><li>تحليل المصفوفة</li><li>التعلم العميق لأنظمة التوصية</li></ul>'}},
-        {id:16,level:'intermediate-advanced',category:'advanced',title:{fa:'Google OR-Tools',en:'Google OR-Tools',fr:'Google OR-Tools', ar:'أدوات OR من جوجل'},duration:{fa:'۱۶ ساعت',en:'16 Hours',fr:'16 Heures', ar:'16 ساعة'},prerequisites:{fa:'ریاضیات برای AI',en:'Math for AI',fr:'Maths pour l\'IA', ar:'الرياضيات للذكاء الاصطناعي'},project:{fa:'بهینه‌سازی لجستیک',en:'Logistics Optimization',fr:'Optimisation logistique', ar:'تحسين الخدمات اللوجستية'},syllabus:{fa:'<ul><li>مقدمه بر OR</li><li>مسائل کلاسیک</li><li>ترکیب با ML</li></ul>',en:'<ul><li>Intro to OR</li><li>Classic Problems</li><li>Combining with ML</li></ul>',fr:'<ul><li>Intro à la RO</li><li>Problèmes classiques</li><li>Combinaison avec le ML</li></ul>', ar:'<ul><li>مقدمة في بحوث العمليات (OR)</li><li>المسائل الكلاسيكية</li><li>الدمج مع تعلم الآلة</li></ul>'}},
-        {id:17,level:'advanced',category:'advanced',title:{fa:'الگوریتم‌های بهینه‌سازی پیشرفته',en:'Advanced Optimization Algorithms',fr:'Algorithmes d\'Optimisation Avancés', ar:'خوارزميات التحسين المتقدمة'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'ریاضیات برای AI',en:'Math for AI',fr:'Maths pour l\'IA', ar:'الرياضيات للذكاء الاصطناعي'},project:{fa:'تنظیم هایپرپارامترها با GA',en:'Hyperparameter Tuning with GA',fr:'Réglage d\'hyperparamètres avec AG', ar:'ضبط المعلمات الفائقة باستخدام الخوارزميات الجينية'},syllabus:{fa:'<ul><li>الگوریتم‌های تکاملی</li><li>Genetic Algorithm, PSO</li><li>بهینه‌سازی در شبکه‌های عصبی</li></ul>',en:'<ul><li>Evolutionary Algorithms</li><li>Genetic Algorithm, PSO</li><li>Optimization in Neural Networks</li></ul>',fr:'<ul><li>Algorithmes évolutifs</li><li>Algorithme Génétique, PSO</li><li>Optimisation dans les réseaux de neurones</li></ul>', ar:'<ul><li>الخوارزميات التطورية</li><li>الخوارزمية الجينية، PSO</li><li>التحسين في الشبكات العصبية</li></ul>'}},
-        {id:18,level:'beginner-intermediate',category:'beginner',title:{fa:'SQL و طراحی پایگاه داده',en:'SQL & Database Design',fr:'SQL & Conception de Bases de Données', ar:'SQL وتصميم قواعد البيانات'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'ندارد',en:'None',fr:'Aucun', ar:'لا يوجد'},project:{fa:'طراحی دیتابیس فروش',en:'Sales Database Design',fr:'Conception de base de données de ventes', ar:'تصميم قاعدة بيانات للمبيعات'},syllabus:{fa:'<ul><li>طراحی ERD</li><li>Queryنویسی پیشرفته</li><li>اتصال به پروژه‌های AI</li></ul>',en:'<ul><li>ERD Design</li><li>Advanced Queries</li><li>Connecting to AI Projects</li></ul>',fr:'<ul><li>Conception MER</li><li>Requêtes avancées</li><li>Connexion aux projets d\'IA</li></ul>', ar:'<ul><li>تصميم مخطط ERD</li><li>الاستعلامات المتقدمة</li><li>الربط بمشاريع الذكاء الاصطناعي</li></ul>'}},
-        {id:19,level:'advanced',category:'advanced',title:{fa:'MLOps و استقرار مدل‌ها',en:'MLOps & Model Deployment',fr:'MLOps & Déploiement de Modèles', ar:'MLOps ونشر النماذج'},duration:{fa:'۳۵ ساعت',en:'35 Hours',fr:'35 Heures', ar:'35 ساعة'},prerequisites:{fa:'یادگیری عمیق',en:'Deep Learning',fr:'Apprentissage Profond', ar:'التعلم العميق'},project:{fa:'استقرار مدل روی سرور',en:'Deploying a model on a server',fr:'Déploiement d\'un modèle sur serveur', ar:'نشر نموذج على خادم'},syllabus:{fa:'<ul><li>مقدمه بر MLOps</li><li>Docker, Kubernetes</li><li>CI/CD برای ML</li><li>Monitoring</li></ul>',en:'<ul><li>Intro to MLOps</li><li>Docker, Kubernetes</li><li>CI/CD for ML</li><li>Monitoring</li></ul>',fr:'<ul><li>Intro à MLOps</li><li>Docker, Kubernetes</li><li>CI/CD pour le ML</li><li>Surveillance</li></ul>', ar:'<ul><li>مقدمة إلى MLOps</li><li>Docker, Kubernetes</li><li>التكامل المستمر/النشر المستمر للتعلم الآلي</li><li>المراقبة</li></ul>'}},
-        {id:20,level:'advanced',category:'advanced',title:{fa:'Generative AI',en:'Generative AI',fr:'IA Générative', ar:'الذكاء الاصطناعي التوليدي'},duration:{fa:'۳۵ ساعت',en:'35 Hours',fr:'35 Heures', ar:'35 ساعة'},prerequisites:{fa:'یادگیری عمیق',en:'Deep Learning',fr:'Apprentissage Profond', ar:'التعلم العميق'},project:{fa:'تولید تصاویر یا متن',en:'Image or Text Generation',fr:'Génération d\'images ou de texte', ar:'توليد الصور أو النصوص'},syllabus:{fa:'<ul><li>مقدمه</li><li>GANs, VAEs</li><li>Diffusion Models</li><li>Fine-tuning مدل‌های مولد</li></ul>',en:'<ul><li>Introduction</li><li>GANs, VAEs</li><li>Diffusion Models</li><li>Fine-tuning generative models</li></ul>',fr:'<ul><li>Introduction</li><li>GANs, VAEs</li><li>Modèles de diffusion</li><li>Fine-tuning des modèles génératifs</li></ul>', ar:'<ul><li>مقدمة</li><li>GANs, VAEs</li><li>نماذج الانتشار</li><li>ضبط النماذج التوليدية</li></ul>'}},
-        {id:21,level:'advanced',category:'advanced',title:{fa:'یادگیری خودنظارتی (Self-Supervised)',en:'Self-Supervised Learning',fr:'Apprentissage Auto-Supervisé', ar:'التعلم ذاتي الإشراف'},duration:{fa:'۲۵ ساعت',en:'25 Hours',fr:'25 Heures', ar:'25 ساعة'},prerequisites:{fa:'یادگیری عمیق',en:'Deep Learning',fr:'Apprentissage Profond', ar:'التعلم العميق'},project:{fa:'بازنمایی ویژگی بدون برچسب',en:'Unsupervised Feature Representation',fr:'Représentation de Caractéristiques non Supervisée', ar:'تمثيل الميزات بدون إشراف'},syllabus:{fa:'<ul><li>مقدمه و انگیزه‌ها</li><li>یادگیری تقابلی (Contrastive Learning)</li><li>معماری‌های Masked Autoencoder</li><li>کاربرد در NLP و CV</li></ul>',en:'<ul><li>Intro & Motivations</li><li>Contrastive Learning</li><li>Masked Autoencoder Architectures</li><li>Applications in NLP & CV</li></ul>',fr:'<ul><li>Introduction et Motivations</li><li>Apprentissage Contrastif</li><li>Architectures d\'Autoencodeur Masqué</li><li>Applications en NLP et CV</li></ul>', ar:'<ul><li>مقدمة ودوافع</li><li>التعلم التبايني</li><li>بنى التشفير التلقائي المقنع</li><li>التطبيقات في معالجة اللغات الطبيعية ورؤية الحاسوب</li></ul>'}},
+        {id:1,level:'beginner',category:'beginner',title:{fa:'مفاهیم و مبانی هوش مصنوعی',en:'AI Concepts & Fundamentals',ar:'مفاهيم وأساسيات الذكاء الاصطناعي'},duration:{fa:'۳۰ ساعت',en:'30 Hours',ar:'30 ساعة'},prerequisites:{fa:'ندارد',en:'None',ar:'لا يوجد'},project:{fa:'N/A',en:'N/A',ar:'لا ينطبق'},syllabus:{fa:'<ul><li>تاریخچه AI</li><li>شاخه‌های AI</li><li>کاربردها</li><li>ابزارها (Python, Jupyter)</li></ul>',en:'<ul><li>History of AI</li><li>Branches of AI</li><li>Applications</li><li>Tools (Python, Jupyter)</li></ul>',ar:'<ul><li>تاريخ الذكاء الاصطناعي</li><li>فروع الذكاء الاصطناعي</li><li>التطبيقات</li><li>الأدوات (Python, Jupyter)</li></ul>'}},
+        {id:2,level:'intermediate',category:'intermediate',title:{fa:'یادگیری ماشین (Machine Learning)',en:'Machine Learning',ar:'تعلم الآلة'},duration:{fa:'۵۰ ساعت',en:'50 Hours',ar:'50 ساعة'},prerequisites:{fa:'مفاهیم و مبانی هوش مصنوعی',en:'AI Concepts & Fundamentals',ar:'مفاهيم وأساسيات الذكاء الاصطناعي'},project:{fa:'N/A',en:'N/A',ar:'لا ينطبق'},syllabus:{fa:'<ul><li>انواع یادگیری</li><li>مدل‌های پایه</li><li>ارزیابی مدل</li><li>Scikit-Learn</li></ul>',en:'<ul><li>Types of Learning</li><li>Basic Models</li><li>Model Evaluation</li><li>Scikit-Learn</li></ul>',ar:'<ul><li>أنواع التعلم</li><li>النماذج الأساسية</li><li>تقييم النماذج</li><li>مكتبة Scikit-Learn</li></ul>'}},
+        {id:3,level:'advanced',category:'advanced',title:{fa:'یادگیری عمیق (Deep Learning)',en:'Deep Learning',ar:'التعلم العميق'},duration:{fa:'۷۰ ساعت',en:'70 Hours',ar:'70 ساعة'},prerequisites:{fa:'یادگیری ماشین',en:'Machine Learning',ar:'تعلم الآلة'},project:{fa:'طبقه‌بندی تصاویر',en:'Image Classification',ar:'تصنيف الصور'},syllabus:{fa:'<ul><li>شبکه‌های عصبی</li><li>Backpropagation</li><li>معماری‌ها (CNN, RNN)</li><li>TensorFlow/PyTorch</li></ul>',en:'<ul><li>Neural Networks</li><li>Backpropagation</li><li>Architectures (CNN, RNN)</li><li>TensorFlow/PyTorch</li></ul>',ar:'<ul><li>الشبكات العصبية</li><li>الانتشار الخلفي</li><li>البنى (CNN, RNN)</li><li>TensorFlow/PyTorch</li></ul>'}},
     ];
     const fullRoboticsCourseData = [
-        {id:1,level:'beginner',category:'beginner',title:{fa:'مبانی رباتیک و مکانیک',en:'Robotics & Mechanics Basics',fr:'Bases de la Robotique et Mécanique', ar:'أساسيات الروبوتات والميكانيكا'},duration:{fa:'۳۰ ساعت',en:'30 Hours',fr:'30 Heures', ar:'30 ساعة'},prerequisites:{fa:'ندارد',en:'None',fr:'Aucun', ar:'لا يوجد'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>تاریخچه رباتیک</li><li>انواع ربات‌ها</li><li>اصول مکانیک</li></ul>',en:'<ul><li>History of Robotics</li><li>Types of Robots</li><li>Mechanical Principles</li></ul>',fr:'<ul><li>Histoire de la robotique</li><li>Types de robots</li><li>Principes de mécanique</li></ul>', ar:'<ul><li>تاريخ الروبوتات</li><li>أنواع الروبوتات</li><li>مبادئ الميكانيكا</li></ul>'}},
-        {id:2,level:'beginner',category:'beginner',title:{fa:'الکترونیک عمومی برای رباتیک',en:'General Electronics for Robotics',fr:'Électronique Générale pour la Robotique', ar:'الإلكترونيات العامة للروبوتات'},duration:{fa:'۳۵ ساعت',en:'35 Hours',fr:'35 Heures', ar:'35 ساعة'},prerequisites:{fa:'ندارد',en:'None',fr:'Aucun', ar:'لا يوجد'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>قانون اهم</li><li>قطعات پایه</li><li>کار با مولتی‌متر</li></ul>',en:'<ul><li>Ohm\'s Law</li><li>Basic Components</li><li>Using a Multimeter</li></ul>',fr:'<ul><li>Loi d\'Ohm</li><li>Composants de base</li><li>Utilisation d\'un multimètre</li></ul>', ar:'<ul><li>قانون أوم</li><li>المكونات الأساسية</li><li>استخدام الملتيميتر</li></ul>'}},
-        {id:3,level:'beginner',category:'beginner',title:{fa:'مدارهای دیجیتال',en:'Digital Circuits',fr:'Circuits Numériques', ar:'الدوائر الرقمية'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'الکترونیک عمومی',en:'General Electronics',fr:'Électronique Générale', ar:'الإلكترونيات العامة'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>گیت‌های منطقی</li><li>جبر بولی</li><li>مدارهای ترتیبی</li></ul>',en:'<ul><li>Logic Gates</li><li>Boolean Algebra</li><li>Sequential Circuits</li></ul>',fr:'<ul><li>Portes logiques</li><li>Algèbre de Boole</li><li>Circuits séquentiels</li></ul>', ar:'<ul><li>البوابات المنطقية</li><li>الجبر البولياني</li><li>الدوائر التتابعية</li></ul>'}},
-        {id:4,level:'beginner',category:'beginner',title:{fa:'برنامه‌نویسی ربات با Scratch',en:'Robot Programming with Scratch',fr:'Programmation de Robot avec Scratch', ar:'برمجة الروبوت باستخدام سكراتش'},duration:{fa:'۲۰ ساعت',en:'20 Hours',fr:'20 Heures', ar:'20 ساعة'},prerequisites:{fa:'ندارد',en:'None',fr:'Aucun', ar:'لا يوجد'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>محیط mBlock</li><li>شرط‌ها و حلقه‌ها</li><li>کنترل سنسورها</li></ul>',en:'<ul><li>mBlock Environment</li><li>Conditions & Loops</li><li>Controlling Sensors</li></ul>',fr:'<ul><li>Environnement mBlock</li><li>Conditions et boucles</li><li>Contrôle des capteurs</li></ul>', ar:'<ul><li>بيئة mBlock</li><li>الشروط والحلقات</li><li>التحكم في الحساسات</li></ul>'}},
-        {id:5,level:'beginner',category:'beginner',title:{fa:'آردوینو مقدماتی',en:'Introduction to Arduino',fr:'Introduction à Arduino', ar:'مقدمة في الأردوينو'},duration:{fa:'۴۵ ساعت',en:'45 Hours',fr:'45 Heures', ar:'45 ساعة'},prerequisites:{fa:'الکترونیک عمومی',en:'General Electronics',fr:'Électronique Générale', ar:'الإلكترونيات العامة'},project:{fa:'پروژه LED و سنسور',en:'LED & Sensor Project',fr:'Projet LED et capteur', ar:'مشروع LED وحساسات'},syllabus:{fa:'<ul><li>معرفی آردوینو</li><li>برنامه‌نویسی پایه</li><li>ورودی/خروجی دیجیتال و آنالوگ</li></ul>',en:'<ul><li>Arduino Introduction</li><li>Basic Programming</li><li>Digital & Analog I/O</li></ul>',fr:'<ul><li>Introduction à Arduino</li><li>Programmation de base</li><li>E/S Numérique et Analogique</li></ul>', ar:'<ul><li>مقدمة عن الأردوينو</li><li>البرمجة الأساسية</li><li>الإدخال/الإخراج الرقمي والتناظري</li></ul>'}},
-        {id:6,level:'intermediate',category:'intermediate',title:{fa:'سنسورها در رباتیک',en:'Sensors in Robotics',fr:'Les Capteurs en Robotique', ar:'الحساسات في الروبوتات'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'آردوینو مقدماتی',en:'Introduction to Arduino',fr:'Introduction à Arduino', ar:'مقدمة في الأردوينو'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>سنسور فاصله</li><li>IMU</li><li>کالیبراسیون</li></ul>',en:'<ul><li>Distance Sensor</li><li>IMU</li><li>Calibration</li></ul>',fr:'<ul><li>Capteur de distance</li><li>IMU</li><li>Étalonnage</li></ul>', ar:'<ul><li>حساس المسافة</li><li>وحدة القياس بالقصور الذاتي (IMU)</li><li>المعايرة</li></ul>'}},
-        {id:7,level:'intermediate',category:'intermediate',title:{fa:'عملگرها و محرک‌ها',en:'Actuators & Drivers',fr:'Actionneurs et Pilotes', ar:'المشغلات والمحركات'},duration:{fa:'۳۰ ساعت',en:'30 Hours',fr:'30 Heures', ar:'30 ساعة'},prerequisites:{fa:'آردوینو مقدماتی',en:'Introduction to Arduino',fr:'Introduction à Arduino', ar:'مقدمة في الأردوينو'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>انواع موتور</li><li>درایور موتور</li><li>مکانیزم‌های حرکتی</li></ul>',en:'<ul><li>Motor Types</li><li>Motor Drivers</li><li>Motion Mechanisms</li></ul>',fr:'<ul><li>Types de moteurs</li><li>Pilotes de moteur</li><li>Mécanismes de mouvement</li></ul>', ar:'<ul><li>أنواع المحركات</li><li>مشغلات المحركات</li><li>آليات الحركة</li></ul>'}},
-        {id:8,level:'intermediate',category:'intermediate',title:{fa:'کنترل بی‌سیم در رباتیک',en:'Wireless Control in Robotics',fr:'Contrôle Sans Fil en Robotique', ar:'التحكم اللاسلكي في الروبوتات'},duration:{fa:'۳۵ ساعت',en:'35 Hours',fr:'35 Heures', ar:'35 ساعة'},prerequisites:{fa:'آردوینو مقدماتی',en:'Introduction to Arduino',fr:'Introduction à Arduino', ar:'مقدمة في الأردوينو'},project:{fa:'ساخت ماشین RC',en:'Build an RC Car',fr:'Construire une voiture RC', ar:'بناء سيارة تحكم عن بعد'},syllabus:{fa:'<ul><li>بلوتوث, WiFi</li><li>پروتکل سریال</li><li>کنترل با موبایل</li></ul>',en:'<ul><li>Bluetooth, WiFi</li><li>Serial Protocol</li><li>Mobile Control</li></ul>',fr:'<ul><li>Bluetooth, WiFi</li><li>Protocole série</li><li>Contrôle mobile</li></ul>', ar:'<ul><li>البلوتوث والواي فاي</li><li>البروتوكول التسلسلي</li><li>التحكم عبر الهاتف المحمول</li></ul>'}},
-        {id:11,level:'intermediate',category:'intermediate',title:{fa:'کنترل پیشرفته با آردوینو',en:'Advanced Arduino Control',fr:'Contrôle Avancé avec Arduino', ar:'التحكم المتقدم بالأردوينو'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'آردوینو مقدماتی',en:'Introduction to Arduino',fr:'Introduction à Arduino', ar:'مقدمة في الأردوينو'},project:{fa:'بازوی رباتیک ساده',en:'Simple Robotic Arm',fr:'Bras robotique simple', ar:'ذراع روبوتية بسيطة'},syllabus:{fa:'<ul><li>تایمرها و وقفه‌ها</li><li>کنترل PWM</li><li>کار با نمایشگرها</li></ul>',en:'<ul><li>Timers & Interrupts</li><li>PWM Control</li><li>Working with Displays</li></ul>',fr:'<ul><li>Minuteries et interruptions</li><li>Contrôle PWM</li><li>Utilisation des écrans</li></ul>', ar:'<ul><li>المؤقتات والمقاطعات</li><li>التحكم بتعديل عرض النبضة (PWM)</li><li>العمل مع الشاشات</li></ul>'}},
-        {id:12,level:'intermediate',category:'intermediate',title:{fa:'رزبری‌پای و لینوکس',en:'Raspberry Pi & Linux',fr:'Raspberry Pi et Linux', ar:'راسبيري باي ولينكس'},duration:{fa:'۵۰ ساعت',en:'50 Hours',fr:'50 Heures', ar:'50 ساعة'},prerequisites:{fa:'پایتون مقدماتی',en:'Python Basics',fr:'Bases de Python', ar:'أساسيات بايثون'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>نصب سیستم‌عامل</li><li>ترمینال لینوکس</li><li>پایتون در رزبری‌پای</li></ul>',en:'<ul><li>OS Installation</li><li>Linux Terminal</li><li>Python on Raspberry Pi</li></ul>',fr:'<ul><li>Installation de l\'OS</li><li>Terminal Linux</li><li>Python sur Raspberry Pi</li></ul>', ar:'<ul><li>تثبيت نظام التشغيل</li><li>طرفية لينكس</li><li>بايثون على راسبيري باي</li></ul>'}},
-        {id:13,level:'intermediate',category:'intermediate',title:{fa:'میکروپایتون',en:'MicroPython',fr:'MicroPython', ar:'مايكرو بايثون'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'رزبری‌پای و لینوکس',en:'Raspberry Pi & Linux',fr:'Raspberry Pi et Linux', ar:'راسبيري باي ولينكس'},project:{fa:'ربات کنترلی تحت وب',en:'Web-Controlled Robot',fr:'Robot contrôlé par le Web', ar:'روبوت يتم التحكم فيه عبر الويب'},syllabus:{fa:'<ul><li>نصب روی ESP32</li><li>برنامه‌نویسی شبکه و IoT</li></ul>',en:'<ul><li>Setup on ESP32</li><li>Network & IoT Programming</li></ul>',fr:'<ul><li>Installation sur ESP32</li><li>Programmation réseau et IoT</li></ul>', ar:'<ul><li>التثبيت على ESP32</li><li>برمجة الشبكات وإنترنت الأشياء</li></ul>'}},
-        {id:14,level:'advanced',category:'advanced',title:{fa:'مبانی کنترل رباتیک',en:'Robotic Control Basics',fr:'Bases du Contrôle Robotique', ar:'أساسيات التحكم في الروبوتات'},duration:{fa:'۴۵ ساعت',en:'45 Hours',fr:'45 Heures', ar:'45ساعة'},prerequisites:{fa:'عملگرها و محرک‌ها',en:'Actuators & Drivers',fr:'Actionneurs et Pilotes', ar:'المشغلات والمحركات'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>سیستم‌های حلقه‌بسته</li><li>کنترل PID</li><li>پایداری سیستم</li></ul>',en:'<ul><li>Closed-loop Systems</li><li>PID Control</li><li>System Stability</li></ul>',fr:'<ul><li>Systèmes en boucle fermée</li><li>Contrôle PID</li><li>Stabilité du système</li></ul>', ar:'<ul><li>أنظمة الحلقة المغلقة</li><li>تحكم PID</li><li>استقرار النظام</li></ul>'}},
-        {id:15,level:'advanced',category:'advanced',title:{fa:'Altium Designer - تکنیک‌های پیشرفته', en:'Altium Designer - Advanced Techniques', fr:'Altium Designer - Techniques Avancées', ar:'Altium Designer - تقنيات متقدمة'},duration:{fa:'۵۰ ساعت',en:'50 Hours',fr:'50 Heures', ar:'50 ساعة'},prerequisites:{fa:'Altium Designer - مبانی',en:'Altium Designer - Fundamentals',fr:'Altium Designer - Fondamentaux', ar:'Altium Designer - أساسيات'},project:{fa:'برد کنترلی موتور BLDC',en:'BLDC Motor Control Board',fr:'Carte de commande de moteur BLDC', ar:'لوحة تحكم بمحرك BLDC'},syllabus:{fa:'<ul><li>PCB چندلایه و Via‌های پیشرفته</li><li>اصول EMI/EMC</li><li>طراحی برای توان بالا</li></ul>',en:'<ul><li>Multilayer PCB</li><li>EMI/EMC Principles</li><li>High Power Design</li></ul>',fr:'<ul><li>PCB multicouche</li><li>Principes EMI/EMC</li><li>Conception haute puissance</li></ul>', ar:'<ul><li>الدوائر المطبوعة متعددة الطبقات</li><li>مبادئ التوافق الكهرومغناطيسي</li><li>تصميم الدوائر عالية القدرة</li></ul>'}},
-        {id:17,level:'advanced',category:'advanced',title:{fa:'رباتیک صنعتی',en:'Industrial Robotics',fr:'Robotique Industrielle', ar:'الروبوتات الصناعية'},duration:{fa:'۵۰ ساعت',en:'50 Hours',fr:'50 Heures', ar:'50 ساعة'},prerequisites:{fa:'مبانی کنترل رباتیک',en:'Robotic Control Basics',fr:'Bases du Contrôle Robotique', ar:'أساسيات التحكم في الروبوتات'},project:{fa:'شبیه‌سازی خط تولید',en:'Production Line Simulation',fr:'Simulation de ligne de production', ar:'محاكاة خط إنتاج'},syllabus:{fa:'<ul><li>ربات‌های KUKA, ABB</li><li>برنامه‌نویسی ربات صنعتی</li><li>ایمنی</li></ul>',en:'<ul><li>KUKA, ABB Robots</li><li>Industrial Robot Programming</li><li>Safety</li></ul>',fr:'<ul><li>Robots KUKA, ABB</li><li>Programmation de robots industriels</li><li>Sécurité</li></ul>', ar:'<ul><li>روبوتات KUKA, ABB</li><li>برمجة الروبوتات الصناعية</li><li>السلامة</li></ul>'}},
-        {id:18,level:'advanced',category:'advanced',title:{fa:'رباتیک پزشکی',en:'Medical Robotics',fr:'Robotique Médicale', ar:'الروبوتات الطبية'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'مبانی کنترل رباتیک',en:'Robotic Control Basics',fr:'Bases du Contrôle Robotique', ar:'أساسيات التحكم في الروبوتات'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>ربات‌های جراح</li><li>ربات‌های توانبخشی</li><li>مکانیزم‌های دقیق</li></ul>',en:'<ul><li>Surgical Robots</li><li>Rehabilitation Robots</li><li>Precision Mechanisms</li></ul>',fr:'<ul><li>Robots chirurgicaux</li><li>Robots de rééducation</li><li>Mécanismes de précision</li></ul>', ar:'<ul><li>الروبوتات الجراحية</li><li>روبوتات إعادة التأهيل</li><li>الآليات الدقيقة</li></ul>'}},
-        {id:19,level:'intermediate',category:'intermediate',title:{fa:'ربات‌های پرنده (Drone)',en:'Flying Robots (Drones)',fr:'Robots Volants (Drones)', ar:'الروبوتات الطائرة (الدرونز)'},duration:{fa:'۵۰ ساعت',en:'50 Hours',fr:'50 Heures', ar:'50 ساعة'},prerequisites:{fa:'سنسورها و عملگرها',en:'Sensors & Actuators',fr:'Capteurs & Actionneurs', ar:'الحساسات والمشغلات'},project:{fa:'ساخت کوادکوپتر',en:'Build a Quadcopter',fr:'Construire un quadricoptère', ar:'بناء كوادكوبتر'},syllabus:{fa:'<ul><li>آیرودینامیک</li><li>کنترل پرواز</li><li>ایمنی</li></ul>',en:'<ul><li>Aerodynamics</li><li>Flight Control</li><li>Safety</li></ul>',fr:'<ul><li>Aérodynamique</li><li>Contrôle de vol</li><li>Sécurité</li></ul>', ar:'<ul><li>الديناميكا الهوائية</li><li>التحكم في الطيران</li><li>السلامة</li></ul>'}},
-        {id:20,level:'intermediate',category:'intermediate',title:{fa:'ربات‌های زیرآبی (ROV)',en:'Underwater Robots (ROV)',fr:'Robots Sous-Marins (ROV)', ar:'الروبوتات تحت الماء (ROV)'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'عملگرها و محرک‌ها',en:'Actuators & Drivers',fr:'Actionneurs et Pilotes', ar:'المشغلات والمحركات'},project:{fa:'ساخت ROV ساده',en:'Build a simple ROV',fr:'Construire un ROV simple', ar:'بناء روبوت بسيط تحت الماء'},syllabus:{fa:'<ul><li>هیدرودینامیک</li><li>طراحی ضدآب</li><li>کنترل با کابل</li></ul>',en:'<ul><li>Hydrodynamics</li><li>Waterproof Design</li><li>Tethered Control</li></ul>',fr:'<ul><li>Hydrodynamique</li><li>Conception étanche</li><li>Contrôle par câble</li></ul>', ar:'<ul><li>الهيدروديناميكا</li><li>التصميم المقاوم للماء</li><li>التحكم السلكي</li></ul>'}},
-        {id:21,level:'advanced',category:'advanced',title:{fa:'رباتیک کشاورزی',en:'Agricultural Robotics',fr:'Robotique Agricole', ar:'الروبوتات الزراعية'},duration:{fa:'۳۵ ساعت',en:'35 Hours',fr:'35 Heures', ar:'35 ساعة'},prerequisites:{fa:'رزبری‌پای و لینوکس',en:'Raspberry Pi & Linux',fr:'Raspberry Pi et Linux', ar:'راسبيري باي ولينكس'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>ربات‌های برداشت</li><li>آبیاری هوشمند</li><li>سنجش خاک</li></ul>',en:'<ul><li>Harvesting Robots</li><li>Smart Irrigation</li><li>Soil Sensing</li></ul>',fr:'<ul><li>Robots de récolte</li><li>Irrigation intelligente</li><li>Analyse du sol</li></ul>', ar:'<ul><li>روبوتات الحصاد</li><li>الري الذكي</li><li>استشعار التربة</li></ul>'}},
-        {id:22,level:'advanced',category:'advanced',title:{fa:'رباتیک امداد و نجات',en:'Search & Rescue Robotics',fr:'Robotique de Recherche et Sauvetage', ar:'روبوتات البحث والإنقاذ'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'مبانی کنترل رباتیک',en:'Robotic Control Basics',fr:'Bases du Contrôle Robotique', ar:'أساسيات التحكم في الروبوتات'},project:{fa:'شبیه‌سازی عملیات امداد',en:'Rescue Mission Simulation',fr:'Simulation de mission de sauvetage', ar:'محاكاة مهمة إنقاذ'},syllabus:{fa:'<ul><li>طراحی ربات مقاوم</li><li>ناوبری در محیط ناشناخته</li></ul>',en:'<ul><li>Rugged Robot Design</li><li>Navigation in Unknown Environments</li></ul>',fr:'<ul><li>Conception de robot robuste</li><li>Navigation en environnement inconnu</li></ul>', ar:'<ul><li>تصميم روبوت متين</li><li>الملاحة في بيئات غير معروفة</li></ul>'}},
-        {id:23,level:'intermediate',category:'intermediate',title:{fa:'اینترنت اشیاء (IoT) در رباتیک',en:'IoT in Robotics',fr:'L\'IoT en Robotique', ar:'إنترنت الأشياء في الروبوتات'},duration:{fa:'۴۰ ساعت',en:'40 Hours',fr:'40 Heures', ar:'40 ساعة'},prerequisites:{fa:'میکروپایتون',en:'MicroPython',fr:'MicroPython', ar:'مايكرو بايثون'},project:{fa:'ربات متصل به اینترنت',en:'Internet-Connected Robot',fr:'Robot connecté à Internet', ar:'روبوت متصل بالإنترنت'},syllabus:{fa:'<ul><li>ارتباط با سرور ابری</li><li>پروتکل MQTT</li><li>داشبورد مانیتورینگ</li></ul>',en:'<ul><li>Cloud Server Communication</li><li>MQTT Protocol</li><li>Monitoring Dashboard</li></ul>',fr:'<ul><li>Communication avec le serveur cloud</li><li>Protocole MQTT</li><li>Tableau de bord de surveillance</li></ul>', ar:'<ul><li>الاتصال بالخوادم السحابية</li><li>بروتوكول MQTT</li><li>لوحة معلومات المراقبة</li></ul>'}},
-        {id:24,level:'intermediate',category:'intermediate',title:{fa:'مدیریت محصول رباتیک',en:'Robotics Product Management',fr:'Gestion de Produit Robotique', ar:'إدارة منتجات الروبوتات'},duration:{fa:'۳۰ ساعت',en:'30 Hours',fr:'30 Heures', ar:'30 ساعة'},prerequisites:{fa:'آشنایی با رباتیک',en:'Familiarity with Robotics',fr:'Connaissance de la robotique', ar:'الإلمام بالروبوتات'},project:{fa:'N/A',en:'N/A',fr:'N/A', ar:'لا ينطبق'},syllabus:{fa:'<ul><li>چرخه عمر محصول</li><li>نیازسنجی بازار</li><li>تجاری‌سازی</li></ul>',en:'<ul><li>Product Lifecycle</li><li>Market Needs Assessment</li><li>Commercialization</li></ul>',fr:'<ul><li>Cycle de vie du produit</li><li>Évaluation des besoins du marché</li><li>Commercialisation</li></ul>', ar:'<ul><li>دورة حياة المنتج</li><li>تقييم احتياجات السوق</li><li>التسويق التجاري</li></ul>'}},
-        {id:25,level:'advanced',category:'advanced',title:{fa:'پروژه نهایی رباتیک',en:'Robotics Capstone Project',fr:'Projet de Fin d\'Études en Robotique', ar:'مشروع تخرج في الروبوتات'},duration:{fa:'۷۰ ساعت',en:'70 Hours',fr:'70 Heures', ar:'70 ساعة'},prerequisites:{fa:'گذراندن اکثر دوره‌ها',en:'Completion of most courses',fr:'Achèvement de la plupart des cours', ar:'إكمال معظم الدورات'},project:{fa:'ساخت ربات کامل',en:'Build a complete robot',fr:'Construire un robot complet', ar:'بناء روبوت متكامل'},syllabus:{fa:'<ul><li>انتخاب موضوع</li><li>طراحی کامل (مکانیک، الکترونیک)</li><li>برنامه‌نویسی و تست</li><li>مستندسازی</li></ul>',en:'<ul><li>Topic Selection</li><li>Full Design (Mech, Elec)</li><li>Programming & Testing</li><li>Documentation</li></ul>',fr:'<ul><li>Sélection du sujet</li><li>Conception complète (Méca, Élec)</li><li>Programmation et tests</li><li>Documentation</li></ul>', ar:'<ul><li>اختيار الموضوع</li><li>التصميم الكامل (ميكانيكي، إلكتروني)</li><li>البرمجة والاختبار</li><li>التوثيق</li></ul>'}},
-        {id:27,level:'advanced',category:'advanced',title:{fa:'بهینه‌سازی کد در آردوینو',en:'Optimizing Arduino Code',fr:'Optimisation du Code Arduino', ar:'تحسين كود الأردوينو'},duration:{fa:'۳۰ ساعت',en:'30 Hours',fr:'30 Heures', ar:'30 ساعة'},prerequisites:{fa:'کنترل پیشرفته با آردوینو',en:'Advanced Arduino Control',fr:'Contrôle Avancé avec Arduino', ar:'التحكم المتقدم بالأردوينو'},project:{fa:'کنترلر PID بهینه',en:'Optimized PID Controller',fr:'Contrôleur PID Optimisé', ar:'وحدة تحكم PID محسنة'},syllabus:{fa:'<ul><li>مدیریت حافظه (RAM, Flash)</li><li>برنامه‌نویسی بدون Delay</li><li>کار با رجیسترها</li><li>کتابخانه‌نویسی</li></ul>',en:'<ul><li>Memory Management (RAM, Flash)</li><li>Non-blocking programming</li><li>Working with registers</li><li>Library development</li></ul>',fr:'<ul><li>Gestion de la mémoire (RAM, Flash)</li><li>Programmation non bloquante</li><li>Travailler avec les registres</li><li>Développement de bibliothèques</li></ul>', ar:'<ul><li>إدارة الذاكرة (RAM, Flash)</li><li>البرمجة غير الحاجبة</li><li>التعامل مع المسجلات</li><li>تطوير المكتبات</li></ul>'}},
-        {id:28, level:'beginner', category:'beginner', title:{fa:'SolidWorks برای رباتیک - مقدماتی', en:'SolidWorks for Robotics - Essentials', fr:'SolidWorks pour la Robotique - Essentiels', ar:'SolidWorks للروبوتات - أساسيات'}, duration:{fa:'۴۵ ساعت',en:'45 Hours',fr:'45 Heures', ar:'45 ساعة'}, prerequisites:{fa:'آشنایی با کامپیوتر',en:'Computer literacy',fr:'Connaissances en informatique', ar:'معرفة أساسيات الحاسوب'}, project:{fa:'طراحی یک شاسی ربات ساده',en:'Design a simple robot chassis',fr:'Conception d\'un châssis de robot simple', ar:'تصميم هيكل روبوت بسيط'}, syllabus:{fa:'<ul><li>آشنایی با محیط نرم‌افزار</li><li>طراحی اسکچ‌های دوبعدی</li><li>مدل‌سازی قطعات سه‌بعدی (Part)</li><li>مونتاژ اولیه قطعات (Assembly)</li></ul>',en:'<ul><li>Software Environment Intro</li><li>2D Sketching</li><li>3D Part Modeling</li><li>Basic Assembly</li></ul>',fr:'<ul><li>Intro à l\'environnement logiciel</li><li>Esquisses 2D</li><li>Modélisation de pièces 3D</li><li>Assemblage de base</li></ul>', ar:'<ul><li>مقدمة إلى بيئة البرنامج</li><li>الرسم ثنائي الأبعاد</li><li>نمذجة الأجزاء ثلاثية الأبعاد</li><li>التجميع الأساسي</li></ul>'}},
-        {id:29, level:'intermediate', category:'intermediate', title:{fa:'SolidWorks برای رباتیک - متوسط', en:'SolidWorks for Robotics - Intermediate', fr:'SolidWorks pour la Robotique - Intermédiaire', ar:'SolidWorks للروبوتات - متوسط'}, duration:{fa:'۶۰ ساعت',en:'60 Hours',fr:'60 Heures', ar:'60 ساعة'}, prerequisites:{fa:'SolidWorks مقدماتی',en:'SolidWorks Essentials',fr:'SolidWorks Essentiels', ar:'SolidWorks أساسيات'}, project:{fa:'مونتاژ کامل یک بازوی رباتیک',en:'Full assembly of a robotic arm',fr:'Assemblage complet d\'un bras robotique', ar:'تجميع كامل لذراع روبوتية'}, syllabus:{fa:'<ul><li>تکنیک‌های پیشرفته Assembly</li><li>تحلیل حرکت (Motion Study)</li><li>تحلیل تنش مقدماتی (FEA)</li><li>ایجاد نقشه‌های مهندسی (Drawing)</li></ul>',en:'<ul><li>Advanced Assembly Techniques</li><li>Motion Study</li><li>Intro to Stress Analysis (FEA)</li><li>Creating Engineering Drawings</li></ul>',fr:'<ul><li>Techniques d\'assemblage avancées</li><li>Étude de mouvement</li><li>Intro à l\'analyse de contraintes (FEA)</li><li>Création de dessins techniques</li></ul>', ar:'<ul><li>تقنيات التجميع المتقدمة</li><li>دراسة الحركة</li><li>مقدمة في تحليل الإجهاد (FEA)</li><li>إنشاء الرسومات الهندسية</li></ul>'}},
-        {id:30, level:'advanced', category:'advanced', title:{fa:'SolidWorks برای رباتیک - پیشرفته', en:'SolidWorks for Robotics - Advanced', fr:'SolidWorks pour la Robotique - Avancé', ar:'SolidWorks للروبوتات - متقدم'}, duration:{fa:'۵۰ ساعت',en:'50 Hours',fr:'50 Heures', ar:'50 ساعة'}, prerequisites:{fa:'SolidWorks متوسط',en:'SolidWorks Intermediate',fr:'SolidWorks Intermédiaire', ar:'SolidWorks متوسط'}, project:{fa:'طراحی ربات برای ساخت (پرینت سه‌بعدی)',en:'Design for Manufacturing (3D Printing)',fr:'Conception pour la fabrication (Impression 3D)', ar:'التصميم للتصنيع (الطباعة ثلاثية الأبعاد)'}, syllabus:{fa:'<ul><li>طراحی سطوح پیچیده (Surfacing)</li><li>ورق‌کاری (Sheet Metal)</li><li>طراحی برای ساخت (DFM)</li><li>شبیه‌سازی و بهینه‌سازی پیشرفته</li></ul>',en:'<ul><li>Complex Surfacing</li><li>Sheet Metal Design</li><li>Design for Manufacturing (DFM)</li><li>Advanced Simulation & Optimization</li></ul>',fr:'<ul><li>Surfaçage Complexe</li><li>Conception de tôlerie</li><li>Conception pour la fabrication (DFM)</li><li>Simulation et Optimisation Avancées</li></ul>', ar:'<ul><li>تصميم الأسطح المعقدة</li><li>تصميم الصفائح المعدنية</li><li>التصميم للتصنيع (DFM)</li><li>المحاكاة والتحسين المتقدم</li></ul>'}},
-        {id:31, level:'intermediate', category:'intermediate', title:{fa:'Altium Designer - مبانی طراحی PCB', en:'Altium Designer - PCB Fundamentals', fr:'Altium Designer - Fondamentaux du PCB', ar:'Altium Designer - أساسيات تصميم لوحات الدوائر المطبوعة'}, duration:{fa:'۴۵ ساعت',en:'45 Hours',fr:'45 Heures', ar:'45 ساعة'}, prerequisites:{fa:'الکترونیک عمومی',en:'General Electronics',fr:'Électronique Générale', ar:'الإلكترونيات العامة'}, project:{fa:'طراحی برد آردوینو شیلد',en:'Design an Arduino Shield board',fr:'Conception d\'une carte Shield Arduino', ar:'تصميم لوحة درع أردوينو (Shield)'}, syllabus:{fa:'<ul><li>محیط Altium و مدیریت پروژه</li><li>ترسیم شماتیک و کتابخانه‌سازی</li><li>طراحی فیبر مدار چاپی (PCB) دولایه</li><li>قوانین طراحی و خروجی گرفتن</li></ul>',en:'<ul><li>Altium Environment & Projects</li><li>Schematic Capture & Library Creation</li><li>2-Layer PCB Layout Design</li><li>Design Rules & Output Generation</li></ul>',fr:'<ul><li>Environnement Altium et projets</li><li>Capture schématique et création de bibliothèque</li><li>Conception de PCB 2 couches</li><li>Règles de conception et génération de sortie</li></ul>', ar:'<ul><li>بيئة Altium وإدارة المشاريع</li><li>رسم المخططات وإنشاء المكتبات</li><li>تصميم لوحة دوائر مطبوعة ثنائية الطبقة</li><li>قواعد التصميم وإنشاء ملفات الإخراج</li></ul>'}}
+        {id:1,level:'beginner',category:'beginner',title:{fa:'مبانی رباتیک و مکانیک',en:'Robotics & Mechanics Basics',ar:'أساسيات الروبوتات والميكانيكا'},duration:{fa:'۳۰ ساعت',en:'30 Hours',ar:'30 ساعة'},prerequisites:{fa:'ندارد',en:'None',ar:'لا يوجد'},project:{fa:'N/A',en:'N/A',ar:'لا ينطبق'},syllabus:{fa:'<ul><li>تاریخچه رباتیک</li><li>انواع ربات‌ها</li><li>اصول مکانیک</li></ul>',en:'<ul><li>History of Robotics</li><li>Types of Robots</li><li>Mechanical Principles</li></ul>',ar:'<ul><li>تاريخ الروبوتات</li><li>أنواع الروبوتات</li><li>مبادئ الميكانيكا</li></ul>'}},
+        {id:2,level:'beginner',category:'beginner',title:{fa:'الکترونیک عمومی برای رباتیک',en:'General Electronics for Robotics',ar:'الإلكترونيات العامة للروبوتات'},duration:{fa:'۳۵ ساعت',en:'35 Hours',ar:'35 ساعة'},prerequisites:{fa:'ندارد',en:'None',ar:'لا يوجد'},project:{fa:'N/A',en:'N/A',ar:'لا ينطبق'},syllabus:{fa:'<ul><li>قانون اهم</li><li>قطعات پایه</li><li>کار با مولتی‌متر</li></ul>',en:'<ul><li>Ohm\'s Law</li><li>Basic Components</li><li>Using a Multimeter</li></ul>',ar:'<ul><li>قانون أوم</li><li>المكونات الأساسية</li><li>استخدام الملتيميتر</li></ul>'}},
+        {id:5,level:'intermediate',category:'intermediate',title:{fa:'آردوینو مقدماتی',en:'Introduction to Arduino',ar:'مقدمة في الأردوينو'},duration:{fa:'۴۵ ساعت',en:'45 Hours',ar:'45 ساعة'},prerequisites:{fa:'الکترونیک عمومی',en:'General Electronics',ar:'الإلكترونيات العامة'},project:{fa:'پروژه LED و سنسور',en:'LED & Sensor Project',ar:'مشروع LED وحساسات'},syllabus:{fa:'<ul><li>معرفی آردوینو</li><li>برنامه‌نویسی پایه</li><li>ورودی/خروجی دیجیتال و آنالوگ</li></ul>',en:'<ul><li>Arduino Introduction</li><li>Basic Programming</li><li>Digital & Analog I/O</li></ul>',ar:'<ul><li>مقدمة عن الأردوينو</li><li>البرمجة الأساسية</li><li>الإدخال/الإخراج الرقمي والتناظري</li></ul>'}},
     ];
     const fullProgrammingCourseData = [
-        {id:1,category:'python',title:{fa:'پایتون مقدماتی',en:'Python Basics',fr:'Python - Les Bases', ar:'أساسيات بايثون'},duration:{fa:'۵۰ ساعت',en:'50 Hours',fr:'50 Heures', ar:'50 ساعة'},prerequisites:{fa:'مبانی کامپیوتر',en:'Computer Basics',fr:'Bases de l\'informatique', ar:'أساسيات الحاسوب'},project:{fa:'ماشین‌حساب',en:'Calculator',fr:'Calculatrice', ar:'آلة حاسبة'},syllabus:{fa:'<ul><li>متغیرها و داده‌ها</li><li>شرط‌ها و حلقه‌ها</li><li>توابع</li><li>OOP پایه</li></ul>',en:'<ul><li>Variables & Data</li><li>Conditionals & Loops</li><li>Functions</li><li>Basic OOP</li></ul>',fr:'<ul><li>Variables et données</li><li>Conditions et boucles</li><li>Fonctions</li><li>POO de base</li></ul>', ar:'<ul><li>المتغيرات وأنواع البيانات</li><li>الجمل الشرطية والحلقات</li><li>الدوال</li><li>أساسيات البرمجة كائنية التوجه</li></ul>'}},
-        {id:2,category:'python',title:{fa:'پایتون متوسط',en:'Intermediate Python',fr:'Python Intermédiaire', ar:'بايثون متوسط'},duration:{fa:'۷۰ ساعت',en:'70 Hours',fr:'70 Heures', ar:'70 ساعة'},prerequisites:{fa:'پایتون مقدماتی',en:'Python Basics',fr:'Python - Les Bases', ar:'أساسيات بايثون'},project:{fa:'تحلیل داده ساده',en:'Simple Data Analysis',fr:'Analyse de données simple', ar:'تحليل بيانات بسيط'},syllabus:{fa:'<ul><li>کتابخانه‌های استاندارد</li><li>Git و GitHub</li><li>کار با API</li><li>NumPy/Pandas مقدماتی</li></ul>',en:'<ul><li>Standard Libraries</li><li>Git & GitHub</li><li>Working with APIs</li><li>Basic NumPy/Pandas</li></ul>',fr:'<ul><li>Bibliothèques standard</li><li>Git et GitHub</li><li>Utilisation des API</li><li>Bases de NumPy/Pandas</li></ul>', ar:'<ul><li>المكتبات القياسية</li><li>Git و GitHub</li><li>التعامل مع واجهات برمجة التطبيقات (APIs)</li><li>أساسيات NumPy/Pandas</li></ul>'}},
-        {id:3,category:'python',title:{fa:'پایتون کاربردی',en:'Applied Python',fr:'Python Appliqué', ar:'بايثون التطبيقي'},duration:{fa:'۱۰۰ ساعت',en:'100 Hours',fr:'100 Heures', ar:'100 ساعة'},prerequisites:{fa:'پایتون متوسط',en:'Intermediate Python',fr:'Python Intermédiaire', ar:'بايثون متوسط'},project:{fa:'اپلیکیشن وب',en:'Web Application',fr:'Application Web', ar:'تطبيق ويب'},syllabus:{fa:'<ul><li>Flask و Django</li><li>FastAPI</li><li>پایگاه داده (SQLite)</li><li>Docker مقدماتی</li></ul>',en:'<ul><li>Flask & Django</li><li>FastAPI</li><li>Databases (SQLite)</li><li>Basic Docker</li></ul>',fr:'<ul><li>Flask et Django</li><li>FastAPI</li><li>Bases de données (SQLite)</li><li>Docker de base</li></ul>', ar:'<ul><li>فلاسك وجانغو</li><li>FastAPI</li><li>قواعد البيانات (SQLite)</li><li>أساسيات دوكر</li></ul>'}},
-        {id:4,category:'python',title:{fa:'پایتون پیشرفته',en:'Advanced Python',fr:'Python Avancé', ar:'بايثون متقدم'},duration:{fa:'۱۲۰ ساعت',en:'120 Hours',fr:'120 Heures', ar:'120 ساعة'},prerequisites:{fa:'پایتون کاربردی',en:'Applied Python',fr:'Python Appliqué', ar:'بايثون التطبيقي'},project:{fa:'پردازش متن یا تصویر',en:'Text or Image Processor',fr:'Processeur de texte ou d\'image', ar:'معالج نصوص أو صور'},syllabus:{fa:'<ul><li>پردازش متن (Regex)</li><li>پردازش تصویر (OpenCV)</li><li>چندریسمانی</li><li>Unit Testing</li></ul>',en:'<ul><li>Text Processing (Regex)</li><li>Image Processing (OpenCV)</li><li>Multithreading</li><li>Unit Testing</li></ul>',fr:'<ul><li>Traitement de texte (Regex)</li><li>Traitement d\'images (OpenCV)</li><li>Multithreading</li><li>Tests unitaires</li></ul>', ar:'<ul><li>معالجة النصوص (Regex)</li><li>معالجة الصور (OpenCV)</li><li>البرمجة متعددة الخيوط</li><li>اختبار الوحدات</li></ul>'}},
-        {id:5,category:'php',title:{fa:'PHP مقدماتی',en:'Basic PHP',fr:'PHP de Base', ar:'أساسيات PHP'},duration:{fa:'۵۰ ساعت',en:'50 Hours',fr:'50 Heures', ar:'50 ساعة'},prerequisites:{fa:'HTML و CSS',en:'HTML & CSS',fr:'HTML et CSS', ar:'HTML و CSS'},project:{fa:'وبلاگ ساده',en:'Simple Blog',fr:'Blog Simple', ar:'مدونة بسيطة'},syllabus:{fa:'<ul><li>مبانی PHP</li><li>کار با فرم‌ها</li><li>پایگاه داده MySQL</li></ul>',en:'<ul><li>PHP Basics</li><li>Working with Forms</li><li>MySQL Database</li></ul>',fr:'<ul><li>Bases de PHP</li><li>Utilisation des formulaires</li><li>Base de données MySQL</li></ul>', ar:'<ul><li>أساسيات PHP</li><li>التعامل مع النماذج</li><li>قاعدة بيانات MySQL</li></ul>'}},
-        {id:6,category:'php',title:{fa:'Laravel مقدماتی',en:'Basic Laravel',fr:'Laravel de Base', ar:'أساسيات Laravel'},duration:{fa:'۷۰ ساعت',en:'70 Hours',fr:'70 Heures', ar:'70 ساعة'},prerequisites:{fa:'PHP مقدماتی',en:'Basic PHP',fr:'PHP de Base', ar:'أساسيات PHP'},project:{fa:'فروشگاه آنلاین',en:'Online Store',fr:'Boutique en Ligne', ar:'متجر إلكتروني'},syllabus:{fa:'<ul><li>معماری MVC</li><li>Routing و Controller</li><li>Blade Template</li><li>Eloquent ORM</li></ul>',en:'<ul><li>MVC Architecture</li><li>Routing & Controllers</li><li>Blade Templates</li><li>Eloquent ORM</li></ul>',fr:'<ul><li>Architecture MVC</li><li>Routage et Contrôleurs</li><li>Modèles Blade</li><li>ORM Eloquent</li></ul>', ar:'<ul><li>بنية MVC</li><li>التوجيه ووحدات التحكم</li><li>قوالب Blade</li><li>Eloquent ORM</li></ul>'}},
-        {id:7,category:'php',title:{fa:'Laravel پیشرفته',en:'Advanced Laravel',fr:'Laravel Avancé', ar:'Laravel متقدم'},duration:{fa:'۹۰ ساعت',en:'90 Hours',fr:'90 Heures', ar:'90 ساعة'},prerequisites:{fa:'Laravel مقدماتی',en:'Basic Laravel',fr:'Laravel de Base', ar:'أساسيات Laravel'},project:{fa:'سیستم رزرو',en:'Booking System',fr:'Système de Réservation', ar:'نظام حجز'},syllabus:{fa:'<ul><li>Middleware</li><li>توسعه API</li><li>WebSocket</li><li>تست و امنیت</li></ul>',en:'<ul><li>Middleware</li><li>API Development</li><li>WebSockets</li><li>Testing & Security</li></ul>',fr:'<ul><li>Middleware</li><li>Développement d\'API</li><li>WebSockets</li><li>Tests et Sécurité</li></ul>', ar:'<ul><li>البرامج الوسيطة (Middleware)</li><li>تطوير واجهات برمجة التطبيقات (API)</li><li>WebSockets</li><li>الاختبار والأمان</li></ul>'}},
-        {id:8,category:'csharp',title:{fa:'C# مقدماتی',en:'Basic C#',fr:'C# de Base', ar:'أساسيات C#'},duration:{fa:'۶۰ ساعت',en:'60 Hours',fr:'60 Heures', ar:'60 ساعة'},prerequisites:{fa:'آشنایی با برنامه‌نویسی',en:'Programming familiarity',fr:'Notions de programmation', ar:'الإلمام بالبرمجة'},project:{fa:'دفترچه یادداشت',en:'Notepad App',fr:'Application Bloc-notes', ar:'تطبيق مفكرة'},syllabus:{fa:'<ul><li>مبانی زبان</li><li>کلاس‌ها و OOP</li><li>Windows Forms</li></ul>',en:'<ul><li>Language Basics</li><li>Classes & OOP</li><li>Windows Forms</li></ul>',fr:'<ul><li>Bases du langage</li><li>Classes et POO</li><li>Windows Forms</li></ul>', ar:'<ul><li>أساسيات اللغة</li><li>الفئات والبرمجة كائنية التوجه</li><li>نماذج ويندوز</li></ul>'}},
-        {id:9,category:'csharp',title:{fa:'ASP.NET Core مقدماتی',en:'Basic ASP.NET Core',fr:'ASP.NET Core de Base', ar:'أساسيات ASP.NET Core'},duration:{fa:'۸۰ ساعت',en:'80 Hours',fr:'80 Heures', ar:'80 ساعة'},prerequisites:{fa:'C# مقدماتی',en:'Basic C#',fr:'C# de Base', ar:'أساسيات C#'},project:{fa:'اپ مدیریت کارها',en:'Task Manager App',fr:'Application de gestion de tâches', ar:'تطبيق إدارة المهام'},syllabus:{fa:'<ul><li>معماری MVC</li><li>Razor Pages</li><li>Entity Framework Core</li></ul>',en:'<ul><li>MVC Architecture</li><li>Razor Pages</li><li>Entity Framework Core</li></ul>',fr:'<ul><li>Architecture MVC</li><li>Razor Pages</li><li>Entity Framework Core</li></ul>', ar:'<ul><li>بنية MVC</li><li>صفحات Razor</li><li>Entity Framework Core</li></ul>'}},
-        {id:10,category:'csharp',title:{fa:'ASP.NET پیشرفته',en:'Advanced ASP.NET',fr:'ASP.NET Avancé', ar:'ASP.NET متقدم'},duration:{fa:'۱۲۰ ساعت',en:'120 Hours',fr:'120 Heures', ar:'120 ساعة'},prerequisites:{fa:'ASP.NET Core مقدماتی',en:'Basic ASP.NET Core',fr:'ASP.NET Core de Base', ar:'أساسيات ASP.NET Core'},project:{fa:'پلتفرم SaaS',en:'SaaS Platform',fr:'Plateforme SaaS', ar:'منصة SaaS'},syllabus:{fa:'<ul><li>API و Microservices</li><li>SignalR</li><li>Security و Testing</li><li>CI/CD</li></ul>',en:'<ul><li>API & Microservices</li><li>SignalR</li><li>Security & Testing</li><li>CI/CD</li></ul>',fr:'<ul><li>API et Microservices</li><li>SignalR</li><li>Sécurité et Tests</li><li>CI/CD</li></ul>', ar:'<ul><li>واجهات API والخدمات المصغرة</li><li>SignalR</li><li>الأمان والاختبار</li><li>التكامل والنشر المستمر (CI/CD)</li></ul>'}},
-        {id:11,category:'java',title:{fa:'جاوا مقدماتی',en:'Basic Java',fr:'Java de Base', ar:'أساسيات Java'},duration:{fa:'۷۰ ساعت',en:'70 Hours',fr:'70 Heures', ar:'70 ساعة'},prerequisites:{fa:'ندارد',en:'None',fr:'Aucun', ar:'لا يوجد'},project:{fa:'اپ کنسولی',en:'Console App',fr:'Application Console', ar:'تطبيق كونسول'},syllabus:{fa:'<ul><li>سینتکس جاوا</li><li>OOP</li><li>Collection Framework</li></ul>',en:'<ul><li>Java Syntax</li><li>OOP</li><li>Collection Framework</li></ul>',fr:'<ul><li>Syntaxe Java</li><li>POO</li><li>Framework de Collections</li></ul>', ar:'<ul><li>بناء جملة Java</li><li>البرمجة كائنية التوجه</li><li>إطار عمل المجموعات</li></ul>'}},
-        {id:12,category:'java',title:{fa:'جاوا پیشرفته',en:'Advanced Java',fr:'Java Avancé', ar:'Java متقدم'},duration:{fa:'۹۰ ساعت',en:'90 Hours',fr:'90 Heures', ar:'90 ساعة'},prerequisites:{fa:'جاوا مقدماتی',en:'Basic Java',fr:'Java de Base', ar:'أساسيات Java'},project:{fa:'نرم‌افزار دسکتاپ',en:'Desktop Software',fr:'Logiciel de Bureau', ar:'برنامج سطح مكتب'},syllabus:{fa:'<ul><li>JDBC</li><li>JavaFX</li><li>Multi-threading</li></ul>',en:'<ul><li>JDBC</li><li>JavaFX</li><li>Multi-threading</li></ul>',fr:'<ul><li>JDBC</li><li>JavaFX</li><li>Multi-threading</li></ul>', ar:'<ul><li>JDBC</li><li>JavaFX</li><li>البرمجة متعددة الخيوط</li></ul>'}},
-        {id:13,category:'java',title:{fa:'اندروید مقدماتی',en:'Basic Android',fr:'Android de Base', ar:'أساسيات أندرويد'},duration:{fa:'۱۰۰ ساعت',en:'100 Hours',fr:'100 Heures', ar:'100 ساعة'},prerequisites:{fa:'جاوا مقدماتی',en:'Basic Java',fr:'Java de Base', ar:'أساسيات Java'},project:{fa:'اپلیکیشن To-Do',en:'To-Do App',fr:'Application de Tâches', ar:'تطبيق قائمة المهام'},syllabus:{fa:'<ul><li>Android Studio</li><li>Activity و Fragment</li><li>UI/UX Design</li></ul>',en:'<ul><li>Android Studio</li><li>Activity & Fragment</li><li>UI/UX Design</li></ul>',fr:'<ul><li>Android Studio</li><li>Activité et Fragment</li><li>Conception UI/UX</li></ul>', ar:'<ul><li>أندرويد ستوديو</li><li>Activity و Fragment</li><li>تصميم واجهة المستخدم/تجربة المستخدم</li></ul>'}},
-        {id:14,category:'java',title:{fa:'اندروید پیشرفته',en:'Advanced Android',fr:'Android Avancé', ar:'أندرويد متقدم'},duration:{fa:'۱۲۰ ساعت',en:'120 Hours',fr:'120 Heures', ar:'120 ساعة'},prerequisites:{fa:'اندروید مقدماتی',en:'Basic Android',fr:'Android de Base', ar:'أساسيات أندرويد'},project:{fa:'اپلیکیشن Chat',en:'Chat App',fr:'Application de Chat', ar:'تطبيق محادثة'},syllabus:{fa:'<ul><li>Room Database</li><li>Retrofit (API)</li><li>Services</li><li>انتشار در Play Store</li></ul>',en:'<ul><li>Room Database</li><li>Retrofit (API)</li><li>Services</li><li>Publishing to Play Store</li></ul>',fr:'<ul><li>Base de données Room</li><li>Retrofit (API)</li><li>Services</li><li>Publication sur le Play Store</li></ul>', ar:'<ul><li>قاعدة بيانات Room</li><li>Retrofit (API)</li><li>الخدمات (Services)</li><li>النشر على متجر Play</li></ul>'}},
-        {id:15,category:'others',title:{fa:'JavaScript & Node.js',en:'JavaScript & Node.js',fr:'JavaScript & Node.js', ar:'JavaScript و Node.js'},duration:{fa:'۱۱۰ ساعت',en:'110 Hours',fr:'110 Heures', ar:'110 ساعة'},prerequisites:{fa:'HTML, CSS',en:'HTML, CSS',fr:'HTML, CSS', ar:'HTML, CSS'},project:{fa:'وب‌اپلیکیشن Real-time',en:'Real-time Web App',fr:'App Web en temps réel', ar:'تطبيق ويب فوري'},syllabus:{fa:'<ul><li>مبانی ES6+</li><li>کار با DOM</li><li>Node.js و Express</li><li>Socket.io</li></ul>',en:'<ul><li>ES6+ Basics</li><li>DOM Manipulation</li><li>Node.js & Express</li><li>Socket.io</li></ul>',fr:'<ul><li>Bases de ES6+</li><li>Manipulation du DOM</li><li>Node.js et Express</li><li>Socket.io</li></ul>', ar:'<ul><li>أساسيات ES6+</li><li>التعامل مع DOM</li><li>Node.js و Express</li><li>Socket.io</li></ul>'}},
-        {id:16,category:'others',title:{fa:'C++ جامع',en:'Comprehensive C++',fr:'C++ Complet', ar:'C++ الشامل'},duration:{fa:'۱۵۰ ساعت',en:'150 Hours',fr:'150 Heures', ar:'150 ساعة'},prerequisites:{fa:'مبانی برنامه‌نویسی',en:'Programming Basics',fr:'Bases de la programmation', ar:'أساسيات البرمجة'},project:{fa:'پروژه الگوریتمی',en:'Algorithmic Project',fr:'Projet Algorithmique', ar:'مشروع خوارزمي'},syllabus:{fa:'<ul><li>مقدماتی تا پیشرفته</li><li>مدیریت حافظه (Pointers)</li><li>STL (Standard Template Library)</li><li>OOP پیشرفته</li></ul>',en:'<ul><li>Beginner to Advanced</li><li>Memory Management (Pointers)</li><li>STL (Standard Template Library)</li><li>Advanced OOP</li></ul>',fr:'<ul><li>Débutant à Avancé</li><li>Gestion de la mémoire (Pointeurs)</li><li>STL (Bibliothèque de Modèles Standard)</li><li>POO Avancée</li></ul>', ar:'<ul><li>من المبتدئ إلى المتقدم</li><li>إدارة الذاكرة (المؤشرات)</li><li>مكتبة القوالب القياسية (STL)</li><li>البرمجة كائنية التوجه المتقدمة</li></ul>'}},
-        {id:17,category:'others',title:{fa:'Go (Golang)',en:'Go (Golang)',fr:'Go (Golang)', ar:'Go (Golang)'},duration:{fa:'۸۰ ساعت',en:'80 Hours',fr:'80 Heures', ar:'80 ساعة'},prerequisites:{fa:'مبانی برنامه‌نویسی',en:'Programming Basics',fr:'Bases de la programmation', ar:'أساسيات البرمجة'},project:{fa:'وب سرور با کارایی بالا',en:'High-performance Web Server',fr:'Serveur Web haute performance', ar:'خادم ويب عالي الأداء'},syllabus:{fa:'<ul><li>مبانی زبان Go</li><li>Concurrency (Goroutines & Channels)</li><li>ساخت API</li><li>کار با Docker</li></ul>',en:'<ul><li>Go Language Basics</li><li>Concurrency (Goroutines & Channels)</li><li>Building APIs</li><li>Working with Docker</li></ul>',fr:'<ul><li>Les bases du langage Go</li><li>Concurrence (Goroutines et Channels)</li><li>Création d\'API</li><li>Utilisation de Docker</li></ul>', ar:'<ul><li>أساسيات لغة Go</li><li>البرمجة المتزامنة (Goroutines & Channels)</li><li>بناء واجهات API</li><li>العمل مع Docker</li></ul>'}},
-        {id:18,category:'others',title:{fa:'Rust',en:'Rust',fr:'Rust', ar:'Rust'},duration:{fa:'۹۰ ساعت',en:'90 Hours',fr:'90 Heures', ar:'90 ساعة'},prerequisites:{fa:'مبانی برنامه‌نویسی',en:'Programming Basics',fr:'Bases de la programmation', ar:'أساسيات البرمجة'},project:{fa:'ابزار خط فرمان (CLI)',en:'Command-Line (CLI) Tool',fr:'Outil en Ligne de Commande (CLI)', ar:'أداة سطر الأوامر (CLI)'},syllabus:{fa:'<ul><li>مبانی Rust</li><li>مفاهیم Ownership & Borrowing</li><li>مدیریت خطا</li><li>Cargo (Package Manager)</li></ul>',en:'<ul><li>Rust Basics</li><li>Ownership & Borrowing Concepts</li><li>Error Handling</li><li>Cargo (Package Manager)</li></ul>',fr:'<ul><li>Les bases de Rust</li><li>Concepts de Propriété et dEmprunt</li><li>Gestion des erreurs</li><li>Cargo (Gestionnaire de paquets)</li></ul>', ar:'<ul><li>أساسيات Rust</li><li>مفاهيم الملكية والاستعارة</li><li>معالجة الأخطاء</li><li>Cargo (مدير الحزم)</li></ul>'}},
-        {id:19,category:'skills',title:{fa:'مهارت‌های نرم‌افزاری',en:'Software Skills',fr:'Compétences Logicielles', ar:'مهارات برمجية'},duration:{fa:'۶۰ ساعت',en:'60 Hours',fr:'60 Heures', ar:'60 ساعة'},prerequisites:{fa:'آشنایی با یک زبان برنامه‌نویسی',en:'Familiarity with a programming language',fr:'Connaissance d\'un langage de programmation', ar:'الإلمام بلغة برمجة'},project:{fa:'پروژه گروهی با Git',en:'Group Project with Git',fr:'Projet de Groupe avec Git', ar:'مشروع جماعي باستخدام Git'},syllabus:{fa:'<ul><li>Git پیشرفته و Gitflow</li><li> متدولوژی‌های Agile و Scrum</li><li>طراحی معماری نرم‌افزار</li><li>مبانی Unit Testing و TDD</li></ul>',en:'<ul><li>Advanced Git & Gitflow</li><li>Agile & Scrum Methodologies</li><li>Software Architecture Design</li><li>Unit Testing & TDD Basics</li></ul>',fr:'<ul><li>Git Avancé et Gitflow</li><li>Méthodologies Agile et Scrum</li><li>Conception dArchitecture Logicielle</li><li>Bases des Tests Unitaires et TDD</li></ul>', ar:'<ul><li>Git المتقدم و Gitflow</li><li>منهجيات Agile و Scrum</li><li>تصميم هندسة البرمجيات</li><li>أساسيات اختبار الوحدات و TDD</li></ul>'}}
+        {id:1,category:'python',level:'beginner',title:{fa:'پایتون مقدماتی',en:'Python Basics',ar:'أساسيات بايثون'},duration:{fa:'۵۰ ساعت',en:'50 Hours',ar:'50 ساعة'},prerequisites:{fa:'مبانی کامپیوتر',en:'Computer Basics',ar:'أساسيات الحاسوب'},project:{fa:'ماشین‌حساب',en:'Calculator',ar:'آلة حاسبة'},syllabus:{fa:'<ul><li>متغیرها و داده‌ها</li><li>شرط‌ها و حلقه‌ها</li><li>توابع</li><li>OOP پایه</li></ul>',en:'<ul><li>Variables & Data</li><li>Conditionals & Loops</li><li>Functions</li><li>Basic OOP</li></ul>',ar:'<ul><li>المتغيرات وأنواع البيانات</li><li>الجمل الشرطية والحلقات</li><li>الدوال</li><li>أساسيات البرمجة كائنية التوجه</li></ul>'}},
+        {id:6,category:'php',level:'intermediate',title:{fa:'Laravel مقدماتی',en:'Basic Laravel',ar:'أساسيات Laravel'},duration:{fa:'۷۰ ساعت',en:'70 Hours',ar:'70 ساعة'},prerequisites:{fa:'PHP مقدماتی',en:'Basic PHP',ar:'أساسيات PHP'},project:{fa:'فروشگاه آنلاین',en:'Online Store',ar:'متجر إلكتروني'},syllabus:{fa:'<ul><li>معماری MVC</li><li>Routing و Controller</li><li>Blade Template</li><li>Eloquent ORM</li></ul>',en:'<ul><li>MVC Architecture</li><li>Routing & Controllers</li><li>Blade Templates</li><li>Eloquent ORM</li></ul>',ar:'<ul><li>بنية MVC</li><li>التوجيه ووحدات التحكم</li><li>قوالب Blade</li><li>Eloquent ORM</li></ul>'}},
+        {id:13,category:'java',level:'advanced',title:{fa:'اندروید مقدماتی',en:'Basic Android',ar:'أساسيات أندرويد'},duration:{fa:'۱۰۰ ساعت',en:'100 Hours',ar:'100 ساعة'},prerequisites:{fa:'جاوا مقدماتی',en:'Basic Java',ar:'أساسيات Java'},project:{fa:'اپلیکیشن To-Do',en:'To-Do App',ar:'تطبيق قائمة المهام'},syllabus:{fa:'<ul><li>Android Studio</li><li>Activity و Fragment</li><li>UI/UX Design</li></ul>',en:'<ul><li>Android Studio</li><li>Activity & Fragment</li><li>UI/UX Design</li></ul>',ar:'<ul><li>أندرويد ستوديو</li><li>Activity و Fragment</li><li>تصميم واجهة المستخدم/تجربة المستخدم</li></ul>'}},
     ];
     // =======================================================
     // II. CORE SCRIPT LOGIC
     // =======================================================
     document.addEventListener("DOMContentLoaded", function() {
-        
         const body = document.body;
         const htmlEl = document.documentElement;
         const passwordGate = document.getElementById('password-gate');
@@ -673,7 +454,7 @@ const translations = {
             const username = userCredentials[passwordInput.value];
             if (username) {
                 passwordContent.style.opacity = '0';
-                
+
                 setTimeout(() => {
                     passwordContent.style.display = 'none';
                     welcomeUserName.textContent = `خوش آمدید, ${username}`;
@@ -687,7 +468,7 @@ const translations = {
 
                         AOS.init({ duration: 800, once: true, offset: 50 });
                         initializeSiteLogic();
-                    }, 2000);
+                    }, 1500);
 
                 }, 400);
 
@@ -704,29 +485,30 @@ const translations = {
         }
 
         themeToggle.addEventListener('click', (e) => {
-            const currentTheme = htmlEl.getAttribute('data-theme') || 'dark';
+            const currentTheme = htmlEl.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
+
             transitionLayer.style.backgroundColor = newTheme === 'light' ? '#F5F5F7' : '#0A0A0A';
             htmlEl.style.setProperty('--clip-x', `${e.clientX}px`);
             htmlEl.style.setProperty('--clip-y', `${e.clientY}px`);
-            
+
             htmlEl.classList.add('is-switching');
-            
             applyTheme(newTheme);
 
             transitionLayer.addEventListener('transitionend', () => {
                 htmlEl.classList.remove('is-switching');
             }, { once: true });
         });
-        
-        applyTheme(localStorage.getItem('theme') || 'dark');
-        
+
+        // FIX: Set default theme to 'light'
+        applyTheme(localStorage.getItem('theme') || 'light');
+
         let siteInitialized = false;
         function initializeSiteLogic() {
             if (siteInitialized) return;
-            
-            let currentLang = localStorage.getItem('language') || 'fa';
+
+            // FIX: Set default language to 'en'
+            let currentLang = localStorage.getItem('language') || 'en';
             let typedInstance;
             const langDisplayMap = {
                 fa: '<span class="flag-icon">🇮🇷</span> فارسی', en: '<span class="flag-icon">🇬🇧</span> English',
@@ -745,10 +527,10 @@ const translations = {
                         el.innerHTML = translations[key][lang];
                     }
                 });
-                
+
                 const langDisplay = document.getElementById('current-lang-display');
                 if(langDisplay) langDisplay.innerHTML = langDisplayMap[lang];
-                
+
                 const typedEl = document.getElementById('typed-text');
                 if(typedEl && typeof Typed !== 'undefined') {
                     if (typedInstance) typedInstance.destroy();
@@ -797,9 +579,9 @@ const translations = {
             const listId = sectionKey === 'ai' ? 'course-list' : `${sectionKey}-course-list`;
             const courseItemsContainer = document.getElementById(listId);
             if (!courseItemsContainer) return;
-             
+
             const courseItems = courseItemsContainer.querySelectorAll('.course-item');
-            
+
             filterButtonsContainer.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
 
@@ -822,7 +604,7 @@ const translations = {
 
             let courseHTML = '';
             let modalHTML = '';
-            const currentLang = localStorage.getItem('language') || 'fa';
+            const currentLang = localStorage.getItem('language') || 'en';
             const levelMapping = {
                 'beginner':{fa:'مقدماتی',en:'Beginner',ar:'مبتدئ',class:'bg-level-beginner'},
                 'intermediate':{fa:'متوسط',en:'Intermediate',ar:'متوسط',class:'bg-level-intermediate'},
@@ -830,44 +612,44 @@ const translations = {
             };
 
             data.forEach(course => {
-                const title = (course.title && course.title[currentLang]) || course.title['fa'];
-                const duration = (course.duration && course.duration[currentLang]) || course.duration['fa'];
-                const prereq = (course.prerequisites && course.prerequisites[currentLang]) || course.prerequisites['fa'];
-                const syllabus = (course.syllabus && course.syllabus[currentLang]) || course.syllabus['fa'];
-                const project = (course.project && course.project[currentLang]) || course.project['fa'];
+                const title = (course.title && course.title[currentLang]) || course.title['en'];
+                const duration = (course.duration && course.duration[currentLang]) || course.duration['en'];
+                const prereq = (course.prerequisites && course.prerequisites[currentLang]) || course.prerequisites['en'];
+                const syllabus = (course.syllabus && course.syllabus[currentLang]) || course.syllabus['en'];
+                const project = (course.project && course.project[currentLang]) || course.project['en'];
                 const levelInfo = levelMapping[course.level];
-                const levelText = levelInfo ? (levelInfo[currentLang] || levelInfo['en']) : '';
+                const levelText = levelInfo ? (levelInfo[currentLang] || levelInfo['en']) : 'N/A';
                 const category = course.category || 'all';
 
                 courseHTML += `
                     <div class="col-lg-4 col-md-6 course-item" data-category="${category}" data-aos="fade-up">
                         <div class="card-container">
-                            <div class="card-inner course-card">
-                               <div class="card-content">
+                            <div class="card-inner d-flex flex-column">
+                               <div class="flex-grow-1">
                                     <h5 class="card-title">${title}</h5>
                                     <ul class="list-unstyled p-0 m-0 mb-4">
-                                        <li class="d-flex align-items-start mb-2">
-                                            <span class="me-2" style="width:20px; text-align:center;"><i class="fas fa-layer-group"></i></span>
-                                            <div><strong>${translations.card_level_label[currentLang] || 'Level'}:</strong>&nbsp;
-                                            ${levelInfo ? `<span class="badge ${levelInfo.class}">${levelText}</span>` : ''}</div>
+                                        <li class="d-flex align-items-start mb-2 text-muted">
+                                            <span class="me-2" style="width:20px; text-align:center;"><i class="fas fa-layer-group text-primary"></i></span>
+                                            <div><strong class="text-body">${translations.card_level_label[currentLang] || 'Level'}:</strong>&nbsp;
+                                            <span class="badge ${levelInfo.class}">${levelText}</span></div>
                                         </li>
-                                        <li class="d-flex align-items-start mb-2">
-                                            <span class="me-2" style="width:20px; text-align:center;"><i class="fas fa-clock"></i></span>
-                                            <div><strong>${translations.card_duration_label[currentLang] || 'Duration'}:</strong>&nbsp;${duration}</div>
+                                        <li class="d-flex align-items-start mb-2 text-muted">
+                                            <span class="me-2" style="width:20px; text-align:center;"><i class="fas fa-clock text-primary"></i></span>
+                                            <div><strong class="text-body">${translations.card_duration_label[currentLang] || 'Duration'}:</strong>&nbsp;${duration}</div>
                                         </li>
-                                        <li class="d-flex align-items-start">
-                                            <span class="me-2" style="width:20px; text-align:center;"><i class="fas fa-book-reader"></i></span>
-                                            <div><strong>${translations.card_prereq_label[currentLang] || 'Prerequisite'}:</strong>&nbsp;${prereq}</div>
+                                        <li class="d-flex align-items-start text-muted">
+                                            <span class="me-2" style="width:20px; text-align:center;"><i class="fas fa-book-reader text-primary"></i></span>
+                                            <div><strong class="text-body">${translations.card_prereq_label[currentLang] || 'Prerequisite'}:</strong>&nbsp;${prereq}</div>
                                         </li>
                                     </ul>
                                </div>
-                               <button class="btn btn-primary mt-auto" data-bs-toggle="modal" data-bs-target="#${sectionKey}Modal${course.id}">
+                               <button class="btn btn-primary mt-auto w-100" data-bs-toggle="modal" data-bs-target="#${sectionKey}Modal${course.id}">
                                     ${translations.card_details_button[currentLang] || 'View Details'}
                                 </button>
                             </div>
                         </div>
                     </div>`;
-                
+
                 modalHTML += `
                     <div class="modal fade" id="${sectionKey}Modal${course.id}" tabindex="-1" aria-hidden="true">
                       <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -878,12 +660,12 @@ const translations = {
                           </div>
                           <div class="modal-body">
                             <h6><strong>${translations.modal_syllabus_label[currentLang] || 'Syllabus'}:</strong></h6>
-                            <p>${syllabus}</p>
+                            <div>${syllabus}</div>
                             <hr class="my-3">
-                            ${levelInfo ? `<p><strong><i class="fas fa-tasks fa-fw me-2"></i> ${translations.modal_level_label[currentLang] || 'Course Level'}:</strong> ${levelText}</p>` : ''}
-                            <p><strong><i class="fas fa-book-reader fa-fw me-2"></i> ${translations.modal_prereq_label[currentLang] || 'Prerequisite'}:</strong> ${prereq}</p>
-                            <p><strong><i class="fas fa-stopwatch fa-fw me-2"></i> ${translations.modal_duration_label[currentLang] || 'Duration'}:</strong> ${duration}</p>
-                            <p><strong><i class="fas fa-rocket fa-fw me-2"></i> ${translations.modal_project_label[currentLang] || 'Practical Project'}:</strong> ${project}</p>
+                            <p><strong><i class="fas fa-tasks fa-fw me-2 text-primary"></i> ${translations.modal_level_label[currentLang] || 'Course Level'}:</strong> <span class="badge ${levelInfo.class}">${levelText}</span></p>
+                            <p><strong><i class="fas fa-book-reader fa-fw me-2 text-primary"></i> ${translations.modal_prereq_label[currentLang] || 'Prerequisite'}:</strong> ${prereq}</p>
+                            <p><strong><i class="fas fa-stopwatch fa-fw me-2 text-primary"></i> ${translations.modal_duration_label[currentLang] || 'Duration'}:</strong> ${duration}</p>
+                            <p><strong><i class="fas fa-rocket fa-fw me-2 text-primary"></i> ${translations.modal_project_label[currentLang] || 'Practical Project'}:</strong> ${project}</p>
                           </div>
                         </div>
                       </div>
@@ -896,7 +678,7 @@ const translations = {
         function populateTestimonials() {
             const container = document.getElementById('testimonial-container');
             if (!container) return;
-            const currentLang = localStorage.getItem('language') || 'fa';
+            const currentLang = localStorage.getItem('language') || 'en';
             let html = '';
             testimonialsData.forEach((testimonial, index) => {
                 const name = testimonial.name;
@@ -906,11 +688,11 @@ const translations = {
                 <div class="carousel-item ${index === 0 ? 'active' : ''}">
                     <div class="card-container">
                         <div class="card-inner p-md-4 p-3">
-                            <p class="text-muted">"${text}"</p>
+                            <blockquote class="text-muted fst-italic">"${text}"</blockquote>
                             <div class="d-flex align-items-center mt-4">
                                 <img src="${testimonial.img}" class="testimonial-img" alt="${name}">
                                 <div>
-                                    <h6 class="mb-0">${name}</h6>
+                                    <h6 class="mb-0 fw-bold">${name}</h6>
                                     <small class="text-muted">${course}</small>
                                 </div>
                             </div>
